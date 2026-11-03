@@ -81,6 +81,11 @@ export function HeroVideo51() {
         ['pointerdown', 'keydown', 'scroll', 'touchstart'].forEach((e) => window.removeEventListener(e, retry));
       };
       ['pointerdown', 'keydown', 'scroll', 'touchstart'].forEach((e) => window.addEventListener(e, retry, { once: true, passive: true }));
+      // aba aberta em segundo plano: tenta de novo quando ela ficar visível
+      const onVis = () => { if (document.visibilityState === 'visible') { retry(); document.removeEventListener('visibilitychange', onVis); } };
+      document.addEventListener('visibilitychange', onVis);
+      // e mais algumas tentativas automáticas (alguns navegadores liberam após o carregamento)
+      [800, 2500, 6000].forEach((ms) => window.setTimeout(() => { if (v.paused) v.play().then(() => setPaused(false)).catch(() => {}); }, ms));
     });
   }, []);
 
