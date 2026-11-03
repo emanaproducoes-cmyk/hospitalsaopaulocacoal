@@ -48,6 +48,8 @@ export function HeroVideo51() {
   const [ready, setReady] = useState(false);
   const [size, setSize] = useState<'1280' | '1920'>('1920');
   const switching = useRef(false);
+  const [fallback, setFallback] = useState(false);
+  const [sweep, setSweep] = useState(0); // dispara a faixa de luz da transição
   const prefix = ((globalThis as { __HBSP_BASE__?: string }).__HBSP_BASE__ ?? '/') + 'videos/hero/';
 
   useEffect(() => {
@@ -58,13 +60,52 @@ export function HeroVideo51() {
     setReady(true);
   }, []);
 
+  // garante "muted" como atributo e propriedade (condição para autoplay em todos os navegadores)
+  const prep = (v: HTMLVideoElement | null) => {
+    if (!v) return;
+    v.muted = true;
+    v.defaultMuted = true;
+    v.setAttribute('muted', '');
+    v.setAttribute('playsinline', '');
+    v.setAttribute('webkit-playsinline', '');
+  };
+
+  // tenta tocar; se o navegador bloquear, tenta de novo na primeira interação/rolagem
+  const tryPlay = useCallback((v: HTMLVideoElement | null) => {
+    if (!v) return;
+    prep(v);
+    v.play().then(() => setPaused(false)).catch(() => {
+      const retry = () => {
+        v.play().then(() => setPaused(false)).catch(() => {});
+        ['pointerdown', 'keydown', 'scroll', 'touchstart'].forEach((e) => window.removeEventListener(e, retry));
+      };
+      ['pointerdown', 'keydown', 'scroll', 'touchstart'].forEach((e) => window.addEventListener(e, retry, { once: true, passive: true }));
+    });
+  }, []);
+
   // inicia o primeiro vídeo
   useEffect(() => {
     if (!ready) return;
+    refs.current.forEach(prep);
     const v = refs.current[0];
     v?.load();
-    v?.play().catch(() => setPaused(true));
+    tryPlay(v);
+  }, [ready, size, tryPlay]);
+
+  // se algum vídeo falhar ao carregar, o hero alterna entre os pôsteres (banner) para continuar animado
+  useEffect(() => {
+    if (!ready) return;
+    const onErr = () => setFallback(true);
+    // só o último <source> indica falha total (o WebM pode falhar e o MP4 assumir)
+    const lasts = refs.current.map((v) => v?.querySelector('source:last-of-type')).filter(Boolean) as HTMLSourceElement[];
+    lasts.forEach((src) => src.addEventListener('error', onErr));
+    return () => lasts.forEach((src) => src.removeEventListener('error', onErr));
   }, [ready, size]);
+  useEffect(() => {
+    if (!fallback) return;
+    const t = window.setInterval(() => { setActive((a) => (a + 1) % VIDEOS.length); setSweep((k) => k + 1); }, 8000);
+    return () => window.clearInterval(t);
+  }, [fallback]);
 
   const crossTo = useCallback((next: number) => {
     if (switching.current) return;
@@ -73,8 +114,9 @@ export function HeroVideo51() {
     switching.current = true;
     const go = () => {
       nv.currentTime = 0;
-      nv.play().catch(() => {});
+      tryPlay(nv);
       setActive(next);
+      setSweep((k) => k + 1);
       window.setTimeout(() => {
         refs.current[1 - next]?.pause();
         switching.current = false;
@@ -87,7 +129,7 @@ export function HeroVideo51() {
       nv.preload = 'auto';
       nv.load();
     }
-  }, []);
+  }, [tryPlay]);
 
   // pré-carrega o próximo vídeo assim que o atual começa a tocar
   useEffect(() => {
@@ -149,6 +191,15 @@ export function HeroVideo51() {
           </video>
         ))}
 
+        {VIDEOS.map((v, i) => (
+          <div
+            key={v.id + '-poster'}
+            aria-hidden="true"
+            className={`hero51-poster ${fallback && active === i ? 'is-active' : ''}`}
+            style={{ backgroundImage: `url(${prefix}${v.name}-poster.webp)` }}
+          />
+        ))}
+        {sweep > 0 && <span key={sweep} className="hero51-sweep" aria-hidden="true" />}
         <div className="hero51-overlay">
           <div className="hero51-actions">
             <TrackedButton href="/agendar?origem=hero-video" event="click_schedule" params={{ origin: 'hero-video' }} icon="calendar">Agendar consulta</TrackedButton>

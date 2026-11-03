@@ -813,7 +813,13 @@
   .hero51-media { position: relative; width: 100%; aspect-ratio: 21 / 9; overflow: hidden; background: #dbe8f7 url('/videos/hero/hero-51anos-poster.webp') center / cover no-repeat; }
   .hero51-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.9s ease; }
   .hero51-video.is-active { opacity: 1; }
-  .hero51-overlay { position: absolute; inset: 0; pointer-events: none; }
+  .hero51-poster { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0; transition: opacity 0.9s ease; animation: hero51-zoom 8s ease-in-out infinite alternate; }
+  .hero51-poster.is-active { opacity: 1; }
+  @keyframes hero51-zoom { from { transform: scale(1); } to { transform: scale(1.04); } }
+  /* faixa de luz que cruza o banner a cada troca entre banner e vídeo */
+  .hero51-sweep { position: absolute; inset: -10% auto -10% 0; width: 38%; z-index: 2; pointer-events: none; background: linear-gradient(100deg, transparent 0%, rgba(255, 255, 255, 0) 18%, rgba(255, 255, 255, 0.55) 50%, rgba(220, 245, 226, 0) 82%, transparent 100%); mix-blend-mode: screen; transform: translateX(-120%) skewX(-14deg); animation: hero51-sweep 1.15s cubic-bezier(.2,.7,.2,1) forwards; }
+  @keyframes hero51-sweep { to { transform: translateX(330%) skewX(-14deg); } }
+  .hero51-overlay { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
   .hero51-actions { position: absolute; right: clamp(12px, 2.6vw, 40px); bottom: clamp(12px, 2.4vw, 32px); display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.6rem; pointer-events: auto; }
   .hero51-actions .btn { box-shadow: 0 10px 28px rgba(10, 20, 60, 0.32); }
   .hero51-toggle { position: absolute; right: 12px; top: 12px; width: 40px; height: 40px; border-radius: 50%; border: 0; background: rgba(255, 255, 255, 0.9); color: var(--brand-navy); display: grid; place-items: center; box-shadow: var(--shadow-sm); pointer-events: auto; }
@@ -828,6 +834,7 @@
     .hero51-toggle { position: absolute; top: 8px; right: 8px; width: 36px; height: 36px; }
   }
   .hero51 + .quick { margin-top: 1rem; }
+  @media (prefers-reduced-motion: reduce) { .hero51-sweep, .hero51-poster { animation: none; } }
 }
 
 /* ---------- Fotos do médico (1080×1080) ---------- */
