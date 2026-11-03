@@ -1,0 +1,158 @@
+openapi: 3.0.3
+info:
+  title: HBSP — API pública do site
+  version: 1.0.0
+  description: |
+    Contrato entre o front-end Next.js e o backend Java (Spring Boot 3 / Java 21).
+    Regras: HTTPS obrigatório, rate limit por IP (ex.: 10 req/min nos POST), validação no servidor,
+    registro do consentimento (ConsentRecord) e trilha de auditoria. Nenhum dado clínico é aceito nestes endpoints.
+servers:
+  - url: https://api.hospitalsaopaulocacoal.com.br/api/v1
+paths:
+  /schedule-requests:
+    post:
+      summary: Solicitação de agendamento (consulta, exame ou retorno)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ScheduleRequest' }
+      responses:
+        '201': { description: Criado, content: { application/json: { schema: { $ref: '#/components/schemas/Protocol' } } } }
+        '422': { description: Dados inválidos, content: { application/json: { schema: { $ref: '#/components/schemas/Problem' } } } }
+        '429': { description: Muitas requisições }
+  /contact-requests:
+    post:
+      summary: Mensagem de contato
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/ContactRequest' } } }
+      responses:
+        '201': { description: Criado, content: { application/json: { schema: { $ref: '#/components/schemas/Protocol' } } } }
+  /feedback:
+    post:
+      summary: Ouvidoria (elogio, sugestão, reclamação, denúncia)
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/Feedback' } } }
+      responses:
+        '201': { description: Criado, content: { application/json: { schema: { $ref: '#/components/schemas/Protocol' } } } }
+  /doctors:
+    get:
+      summary: Lista de médicos publicados (para o CMS/ISR)
+      parameters:
+        - { name: specialty, in: query, schema: { type: string } }
+        - { name: insurance, in: query, schema: { type: string } }
+        - { name: q, in: query, schema: { type: string } }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Doctor' } } } } }
+  /specialties:
+    get:
+      summary: Especialidades publicadas
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Specialty' } } } } }
+  /exams/{slug}:
+    get:
+      summary: Exame com preparo aprovado
+      parameters: [{ name: slug, in: path, required: true, schema: { type: string } }]
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Exam' } } } }
+        '404': { description: Não encontrado }
+  /units/{id}/schedule:
+    get:
+      summary: Horários de funcionamento por unidade/serviço
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses:
+        '200': { description: OK }
+components:
+  schemas:
+    Editorial:
+      type: object
+      properties:
+        status: { type: string, enum: [draft, review, published, expired] }
+        updatedAt: { type: string, format: date-time }
+        reviewedBy: { type: string }
+        source: { type: string }
+    ConsentRecord:
+      type: object
+      required: [purpose, granted, policyVersion, timestamp]
+      properties:
+        purpose: { type: string, enum: [contato, agendamento, ouvidoria, cookies-analytics, cookies-marketing] }
+        granted: { type: boolean }
+        policyVersion: { type: string }
+        timestamp: { type: string, format: date-time }
+    ScheduleRequest:
+      type: object
+      required: [type, period, insurance, name, phone, origin, consent]
+      properties:
+        type: { type: string, enum: [consulta, exame, retorno] }
+        specialty: { type: string }
+        exam: { type: string }
+        doctor: { type: string }
+        period: { type: string, enum: [manha, tarde, qualquer] }
+        insurance: { type: string, enum: [particular, convenio, nao-sei] }
+        name: { type: string, minLength: 3, maxLength: 120 }
+        phone: { type: string, pattern: '^[0-9()\s+-]{10,20}$' }
+        origin: { type: string, description: 'página|utm_source|utm_campaign' }
+        consent: { $ref: '#/components/schemas/ConsentRecord' }
+    ContactRequest:
+      type: object
+      required: [name, phone, topic, message, origin, consent]
+      properties:
+        name: { type: string }
+        phone: { type: string }
+        email: { type: string, format: email }
+        topic: { type: string, enum: [agendamento, duvida, internacao, convenio, outros] }
+        message: { type: string, maxLength: 2000 }
+        origin: { type: string }
+        consent: { $ref: '#/components/schemas/ConsentRecord' }
+    Feedback:
+      type: object
+      required: [type, anonymous, message, consent]
+      properties:
+        type: { type: string, enum: [elogio, sugestao, reclamacao, denuncia] }
+        anonymous: { type: boolean }
+        name: { type: string }
+        contact: { type: string }
+        message: { type: string, maxLength: 4000 }
+        consent: { $ref: '#/components/schemas/ConsentRecord' }
+    Protocol:
+      type: object
+      properties:
+        protocol: { type: string, example: 'HBSP-2026-000123' }
+    Problem:
+      type: object
+      properties:
+        title: { type: string }
+        status: { type: integer }
+        errors: { type: object, additionalProperties: { type: string } }
+    Doctor:
+      allOf:
+        - $ref: '#/components/schemas/Editorial'
+        - type: object
+          properties:
+            slug: { type: string }
+            name: { type: string }
+            specialties: { type: array, items: { type: string } }
+            registry: { type: string, example: 'CRM-RO 0000 · RQE 0000' }
+            insurances: { type: array, items: { type: string } }
+            acceptsScheduling: { type: boolean }
+    Specialty:
+      allOf:
+        - $ref: '#/components/schemas/Editorial'
+        - type: object
+          properties:
+            slug: { type: string }
+            name: { type: string }
+            group: { type: string }
+            summary: { type: string }
+    Exam:
+      allOf:
+        - $ref: '#/components/schemas/Editorial'
+        - type: object
+          properties:
+            slug: { type: string }
+            name: { type: string }
+            preparation: { type: array, items: { type: string }, nullable: true }
+            documents: { type: array, items: { type: string } }
+            duration: { type: string, nullable: true }
