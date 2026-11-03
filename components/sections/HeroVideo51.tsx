@@ -37,7 +37,7 @@ const FADE = 0.9; // segundos de fusão entre um vídeo e o outro
  * Hero em vídeo:
  * - dois <video> sobrepostos; ao final de um, o outro entra com fusão (crossfade) → loop infinito;
  * - escolhe 1280 ou 1920 conforme a tela; WebM com fallback MP4;
- * - botão de pausa (WCAG 2.2.2); "reduzir movimento" mostra só o pôster;
+ * - botão de pausa (WCAG 2.2.2); com "reduzir movimento", toca sem faixa de luz nem zoom;
  * - o texto dos vídeos também existe em HTML (SEO e leitores de tela);
  * - botões de ação sobre a parte inferior do vídeo (no celular, logo abaixo).
  */
@@ -53,7 +53,8 @@ export function HeroVideo51() {
   const prefix = ((globalThis as { __HBSP_BASE__?: string }).__HBSP_BASE__ ?? '/') + 'videos/hero/';
 
   useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setPaused(true); return; }
+    // O vídeo toca mesmo com "reduzir movimento" ativo no sistema: é decorativo e tem botão de pausa
+    // (WCAG 2.2.2). Nesse caso só a faixa de luz e o zoom do pôster ficam desligados (via CSS).
     // largura real do banner (container de até 1280 px) × densidade da tela
     const shown = Math.min(window.innerWidth, 1280) * window.devicePixelRatio;
     setSize(shown <= 1300 ? '1280' : '1920');
