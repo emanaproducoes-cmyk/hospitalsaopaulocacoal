@@ -3,6 +3,7 @@ import { site } from '@/lib/data/site';
 import { services } from '@/lib/data/services';
 import { specialties } from '@/lib/data/specialties';
 import { doctors } from '@/lib/data/doctors';
+import { asset } from '@/lib/asset';
 import { Icon } from '@/components/ui/Icon';
 import { SectionHeading } from '@/components/ui/primitives';
 import { Tooltip } from '@/components/ui/Tooltip';
@@ -158,7 +159,11 @@ export function TrustSection() {
 export function FinalCTA() {
   return (
     <section className="final-cta" aria-labelledby="final-title">
-      <div className="container final-cta-inner">
+      <div className="container">
+      <div className="final-cta-card">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="final-cta-bg" src={asset('/images/galeria/equipe.webp')} alt="" loading="lazy" />
+        <div className="final-cta-inner">
         <div>
           <h2 id="final-title">Vamos cuidar de você?</h2>
           <p>Fale com a nossa central: tiramos dúvidas, orientamos sobre especialidades e agendamos o seu atendimento.</p>
@@ -168,6 +173,8 @@ export function FinalCTA() {
           <TrackedButton href={whatsappLink({ intent: 'Dúvida', origin: 'home-final' })} event="click_whatsapp" params={{ origin: 'home-final' }} variant="green" icon="whatsapp" size="lg">Falar no WhatsApp</TrackedButton>
           <Link href="/ouvidoria" className="text-link on-dark">Deixar um elogio ou sugestão <Icon name="arrow-right" size={16} /></Link>
         </div>
+        </div>
+      </div>
       </div>
     </section>
   );

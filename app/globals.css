@@ -990,19 +990,6 @@
   .emergency-samu h3 .tooltip { z-index: 60; }
   @media (min-width: 641px) { .emergency-samu h3 .tooltip { left: auto; right: -14px; transform: translate(0, 4px); } .emergency-samu h3 .tooltip.is-open { transform: none; } .emergency-samu h3 .tooltip::after { left: auto; right: 20px; transform: none; } }
 
-  /* --- II. faixa vermelha em vidro --- */
-  .footer-band { position: relative; isolation: isolate; overflow: hidden; background: linear-gradient(180deg, transparent 0 50%, var(--brand-navy) 50% 100%); color: #fff; padding: 1rem 0 0.5rem; }
-  .footer-band-glow { position: absolute; inset: 0; z-index: -1; background:
-      radial-gradient(260px 120px at 18% 55%, rgba(255, 80, 88, 0.85), transparent 70%),
-      radial-gradient(320px 140px at 70% 60%, rgba(192, 38, 45, 0.9), transparent 70%),
-      radial-gradient(240px 110px at 92% 40%, rgba(41, 65, 151, 0.8), transparent 70%); filter: blur(8px); }
-  .footer-band-inner { position: relative; padding: 1rem 1.5rem !important; border-radius: 22px; background: linear-gradient(120deg, rgba(156, 28, 34, 0.62), rgba(192, 38, 45, 0.48)); backdrop-filter: blur(20px) saturate(170%); -webkit-backdrop-filter: blur(20px) saturate(170%); border: 1px solid rgba(255, 255, 255, 0.35); box-shadow: 0 16px 40px rgba(120, 10, 20, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.45), inset 0 -1px 0 rgba(0, 0, 0, 0.12); overflow: hidden; flex-wrap: nowrap !important; }
-  @media (max-width: 760px) { .footer-band-inner { flex-wrap: wrap !important; margin-inline: 1rem; } }
-  .footer-band-inner::before { content: ''; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.22) 45%, transparent 60%); transform: translateX(-100%); animation: band-sheen 6s var(--ease) infinite; pointer-events: none; }
-  @keyframes band-sheen { 0%, 55% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-  .footer-band-icon { flex: none; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.35); }
-  .footer-band p { flex: 1; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); }
-
   /* --- Cirurgia robótica --- */
   .robotic { position: relative; isolation: isolate; overflow: hidden; padding-block: var(--section); color: #dfe6f7;
     background: radial-gradient(900px 500px at 85% 10%, rgba(64, 120, 255, 0.35), transparent 60%), radial-gradient(700px 500px at 0% 90%, rgba(47, 164, 65, 0.18), transparent 60%), linear-gradient(160deg, #0b1538 0%, #14214f 45%, #0f1d4d 100%); }
@@ -1065,11 +1052,26 @@
 
   @media (prefers-contrast: more), (forced-colors: active) {
     .card, .quick-card, .service-card, .doctor-card, .article-card, .video-card, .emergency-samu, .wizard, .datepicker { background: #fff; backdrop-filter: none; -webkit-backdrop-filter: none; border-color: currentColor; }
-    .footer-band-inner { background: var(--alert-700); backdrop-filter: none; }
   }
-  @media (prefers-reduced-motion: reduce) { .footer-band-inner::before { animation: none; } }
 }
 @layer components {
   .high-contrast .card, .high-contrast .quick-card, .high-contrast .service-card, .high-contrast .doctor-card, .high-contrast .article-card, .high-contrast .video-card, .high-contrast .emergency-samu, .high-contrast .wizard { background: #fff; backdrop-filter: none; -webkit-backdrop-filter: none; border-color: #000; }
-  .high-contrast .footer-band-inner { background: #7a0d12; backdrop-filter: none; }
+}
+
+/* ---------- "Vamos cuidar de você?" como card com foto ---------- */
+@layer components {
+  .final-cta { background: transparent; padding-block: 0 var(--section); overflow: visible; }
+  .final-cta::before { display: none; }
+  .final-cta-card { position: relative; isolation: isolate; overflow: hidden; border-radius: var(--r-xl); background: var(--brand-navy); padding: clamp(2rem, 1rem + 4vw, 4.5rem); box-shadow: 0 24px 60px rgba(20, 33, 79, 0.28); }
+  .final-cta-bg { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; object-position: 70% 30%; }
+  .final-cta-card::before { content: ''; position: absolute; inset: 0; z-index: -1; background:
+      linear-gradient(90deg, rgba(20, 33, 79, 0.97) 0%, rgba(20, 33, 79, 0.9) 38%, rgba(31, 50, 120, 0.55) 62%, rgba(31, 50, 120, 0.1) 100%),
+      radial-gradient(60% 90% at 0% 100%, rgba(47, 164, 65, 0.3), transparent 70%); }
+  .final-cta-card .final-cta-inner { grid-template-columns: 1fr !important; max-width: 560px; gap: 1.75rem; }
+  .final-cta-card .final-actions { justify-content: flex-start; }
+  @media (max-width: 759px) {
+    .final-cta-card { padding-top: 14rem; }
+    .final-cta-bg { height: 16rem; object-position: 60% 25%; }
+    .final-cta-card::before { background: linear-gradient(180deg, rgba(20, 33, 79, 0) 0, rgba(20, 33, 79, 0.2) 6rem, var(--brand-navy) 15rem, var(--brand-navy) 100%); }
+  }
 }
