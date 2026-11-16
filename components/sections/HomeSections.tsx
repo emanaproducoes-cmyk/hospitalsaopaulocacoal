@@ -4,7 +4,7 @@ import { services } from '@/lib/data/services';
 import { specialties } from '@/lib/data/specialties';
 import { doctors } from '@/lib/data/doctors';
 import { Icon } from '@/components/ui/Icon';
-import { PendingBadge, SectionHeading } from '@/components/ui/primitives';
+import { SectionHeading } from '@/components/ui/primitives';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { TrackedButton, TrackedA } from '@/components/ui/Tracked';
 import { Reveal } from '@/components/ui/Reveal';
@@ -12,9 +12,9 @@ import { whatsappLink } from '@/lib/integrations/whatsapp';
 
 /* ======================= DECISÃO RÁPIDA ======================= */
 const decisions = [
-  { icon: 'emergency' as const, title: 'Estou com uma urgência', text: 'Endereço, rota e quando ligar 192.', href: '/pronto-atendimento', tone: 'alert', event: 'click_emergency' as const },
+  { icon: 'siren' as const, title: 'Estou com uma urgência', text: 'Endereço, rota e sinais de alerta.', href: '/pronto-atendimento', tone: 'alert', event: 'click_emergency' as const },
   { icon: 'calendar' as const, title: 'Quero agendar', text: 'Consulta ou retorno em 4 passos.', href: '/agendar?origem=home-decisao', tone: 'blue', event: 'click_schedule' as const },
-  { icon: 'scan' as const, title: 'Preciso fazer um exame', text: 'Preparo, documentos e agendamento.', href: '/exames', tone: 'green', event: 'view_exam_prep' as const },
+  { icon: 'test-tube' as const, title: 'Preciso fazer um exame', text: 'Preparo, documentos e agendamento.', href: '/exames', tone: 'green', event: 'view_exam_prep' as const },
   { icon: 'doctor' as const, title: 'Busco um médico', text: 'Por nome ou especialidade.', href: '/medicos', tone: 'navy', event: 'search_doctor' as const },
 ];
 
@@ -51,7 +51,7 @@ export function EmergencyPanel({ compact = false }: { compact?: boolean }) {
           <p className="eyebrow on-dark">Pronto atendimento</p>
           <h2 id="pa-title">Precisa de atendimento agora?</h2>
           <p className="emergency-status">
-            <span className="pulse" aria-hidden="true" /> Aberto todos os dias · {site.emergency.hours.value} <PendingBadge />
+            <span className="pulse" aria-hidden="true" /> Aberto todos os dias
           </p>
           <ul className="emergency-facts">
             <li><Icon name="pin" size={20} /><span><strong>{site.address.street}</strong><br />{site.address.district} · {site.address.city}/{site.address.state}</span></li>
@@ -63,20 +63,24 @@ export function EmergencyPanel({ compact = false }: { compact?: boolean }) {
             <TrackedButton href={`tel:${site.contacts.scheduling.tel}`} event="click_emergency" params={{ origin: 'pa-panel', action: 'call' }} variant="ghost" icon="phone" className="on-dark">Ligar para o hospital</TrackedButton>
           </div>
         </div>
-        <aside className="emergency-samu" aria-labelledby="samu-title">
-          <p className="samu-number" aria-hidden="true">192</p>
-          <h3 id="samu-title">
-            Risco de vida? Ligue 192 (SAMU)
-            <Tooltip content="O SAMU é o serviço público de atendimento móvel de urgência. A equipe começa o cuidado no local e leva o paciente ao hospital mais adequado. A ligação é gratuita." label="O que é o SAMU?" />
+        <aside className="emergency-samu" aria-labelledby="alert-title">
+          <span className="samu-number" aria-hidden="true"><Icon name="emergency" size={120} /></span>
+          <h3 id="alert-title">
+            Sinais de alerta: venha imediatamente
+            <Tooltip content="Na chegada, a enfermagem faz a classificação de risco: os casos mais graves são atendidos primeiro, não por ordem de chegada." label="Como funciona o atendimento por gravidade" />
           </h3>
-          <p>Ligue <strong>antes</strong> de sair de casa se a pessoa:</p>
+          <p>Não espere melhorar sozinho se houver:</p>
           <ul className="check-list">
-            <li>está inconsciente ou com falta de ar intensa</li>
-            <li>tem dor forte no peito</li>
-            <li>apresenta sinais de AVC: boca torta, fraqueza de um lado, fala enrolada</li>
-            <li>sofreu um acidente grave ou tem sangramento intenso</li>
+            <li>dor forte ou aperto no peito</li>
+            <li>falta de ar intensa ou lábios arroxeados</li>
+            <li>sinais de AVC: boca torta, fraqueza de um lado, fala enrolada</li>
+            <li>desmaio, convulsão, sangramento intenso ou acidente</li>
           </ul>
-          <TrackedButton href="tel:192" event="click_emergency" params={{ origin: 'pa-panel', action: 'samu' }} variant="alert" icon="phone">Ligar 192</TrackedButton>
+          <p className="alert-note">Se a pessoa não puder se deslocar com segurança, ligue para o hospital e peça orientação.</p>
+          <div className="emergency-actions">
+            <TrackedButton href={`tel:${site.contacts.scheduling.tel}`} event="click_emergency" params={{ origin: 'pa-panel-alert', action: 'call' }} variant="alert" icon="phone">Ligar para o hospital</TrackedButton>
+            <TrackedButton href={site.address.mapsUrl} event="view_location" params={{ origin: 'pa-panel-alert' }} variant="secondary" icon="route">Rota até o PA</TrackedButton>
+          </div>
         </aside>
       </div>
     </section>
@@ -128,10 +132,10 @@ export function TrustSection() {
             <div><dt>Especialidades e áreas</dt><dd>{specialties.length}</dd></div>
             <div><dt>Médicos com perfil publicado</dt><dd>{doctors.length}</dd></div>
           </dl>
-          <p className="source-note">Fonte: hmsaopaulo.com.br, consultado em 02/11/2026. Leitos, atendimentos/ano e certificações: <PendingBadge text="dados a validar" /></p>
+          
           <blockquote className="quote">
             <p>“Cada pessoa que entra aqui é recebida como gostaríamos que a nossa família fosse recebida.”</p>
-            <footer>Princípio de cuidado do HBSP <PendingBadge text="frase a aprovar" /></footer>
+            <footer>Princípio de cuidado do HBSP</footer>
           </blockquote>
         </div>
         <ol className="timeline" aria-label="Linha do tempo">

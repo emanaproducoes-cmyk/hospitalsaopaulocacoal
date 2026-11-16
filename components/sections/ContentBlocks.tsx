@@ -1,9 +1,8 @@
 import Link from 'next/link';
 import type { Article, FAQ } from '@/lib/domain/types';
 import { articleIntents } from '@/lib/data/articles';
-import { Artwork } from '@/components/ui/Artwork';
+import { asset } from '@/lib/asset';
 import { Icon } from '@/components/ui/Icon';
-import { PendingBadge } from '@/components/ui/primitives';
 import { site } from '@/lib/data/site';
 
 const fmt = (iso: string) => new Date(iso + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
@@ -12,7 +11,10 @@ export function ArticleCard({ a }: { a: Article }) {
   return (
     <article className="article-card">
       <Link href={`/conteudo/${a.slug}`} className="article-link">
-        <Artwork name={a.image} ratio="16 / 10" showTag={false} />
+        <div className="artwork is-photo" style={{ aspectRatio: '16 / 10' }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={asset(`${a.image}-sm.webp`)} alt="" loading="lazy" decoding="async" />
+        </div>
         <div className="article-body">
           <p className="article-intent">{articleIntents[a.intent]}</p>
           <h3>{a.title}</h3>
@@ -34,7 +36,7 @@ export function FAQList({ items }: { items: FAQ[] }) {
             <span className="faq-icon" aria-hidden="true"><Icon name="plus" size={18} /></span>
           </summary>
           <div className="faq-answer">
-            <p>{f.answer} {f.pendingValidation && <PendingBadge />}</p>
+            <p>{f.answer}</p>
           </div>
         </details>
       ))}
@@ -48,7 +50,7 @@ export function LocationCard() {
       <h3>Hospital São Paulo · Cacoal</h3>
       <ul className="loc-list">
         <li><Icon name="pin" size={20} /><span>{site.address.street} – {site.address.district}<br />{site.address.city} – {site.address.state} · CEP {site.address.zip}</span></li>
-        <li><Icon name="clock" size={20} /><span>Pronto atendimento: todos os dias <PendingBadge text="horário a validar" /></span></li>
+        <li><Icon name="clock" size={20} /><span>Pronto atendimento: todos os dias</span></li>
         <li><Icon name="whatsapp" size={20} /><span>Central e agendamentos: <a href={`tel:${site.contacts.scheduling.tel}`}>{site.contacts.scheduling.label}</a></span></li>
         <li><Icon name="child" size={20} /><span>Plantão pediátrico: <a href={`tel:${site.contacts.pediatricOnCall.tel}`}>{site.contacts.pediatricOnCall.label}</a></span></li>
       </ul>

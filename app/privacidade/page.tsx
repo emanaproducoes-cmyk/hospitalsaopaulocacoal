@@ -1,6 +1,7 @@
+import Link from 'next/link';
 import type { Metadata } from 'next';
 import { CookieSettingsButton } from '@/components/layout/CookieConsent';
-import { PageHero, PendingBadge } from '@/components/ui/primitives';
+import { PageHero } from '@/components/ui/primitives';
 import { site } from '@/lib/data/site';
 
 export const metadata: Metadata = {
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
 export default function PrivacidadePage() {
   return (
     <>
-      <PageHero crumbs={[{ label: 'Privacidade' }]} eyebrow="LGPD" title="Privacidade e proteção de dados" intro={<>Versão {site.policyVersion}. Minuta para revisão jurídica do hospital. <PendingBadge text="revisão jurídica" /></>} />
+      <PageHero crumbs={[{ label: 'Privacidade' }]} eyebrow="LGPD" title="Privacidade e proteção de dados" intro={<>Versão {site.policyVersion}.</>} />
       <section className="section">
         <div className="container narrow prose">
           <h2>1. Quais dados coletamos no site</h2>
@@ -35,7 +36,7 @@ export default function PrivacidadePage() {
           <h2>5. Seus direitos</h2>
           <p>Você pode pedir confirmação, acesso, correção, anonimização, portabilidade, eliminação dos dados e revogação do consentimento, conforme o art. 18 da LGPD (Lei 13.709/2018).</p>
           <h2>6. Encarregado (DPO)</h2>
-          <p>Nome e canal de contato do encarregado de dados: <PendingBadge /></p>
+          <p>Para exercer seus direitos ou tirar dúvidas sobre o tratamento dos seus dados, fale com o hospital pelo <Link href="/ouvidoria">formulário da ouvidoria</Link> ou pela central (69) 99305-0030, informando o assunto "Privacidade de dados".</p>
           <h2>7. Retenção e segurança</h2>
           <p>Mantemos os dados apenas pelo tempo necessário à finalidade e adotamos medidas técnicas como criptografia em trânsito (HTTPS), controle de acesso e registros de auditoria.</p>
         </div>

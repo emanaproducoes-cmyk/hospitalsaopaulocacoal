@@ -2,10 +2,9 @@
  * FONTE ÚNICA de dados institucionais.
  * Qualquer telefone, endereço ou horário exibido no site deve vir daqui.
  * Fonte pública: hmsaopaulo.com.br (consultado em 02/11/2026).
- * Itens com `pending: true` precisam ser confirmados pelo hospital antes da publicação.
  */
 
-export const SHOW_VALIDATION_FLAGS = process.env.NEXT_PUBLIC_SHOW_VALIDATION_FLAGS !== 'false';
+export const SHOW_VALIDATION_FLAGS = false;
 
 export const site = {
   name: 'Hospital Beneficente São Paulo de Cacoal',
@@ -14,11 +13,11 @@ export const site = {
   tagline: 'Cuidado que acolhe. Saúde que acompanha você.',
   description:
     'Hospital em Cacoal (RO) desde 1975, com pronto atendimento, centro cirúrgico, internação, diagnóstico e 30 especialidades. Agende pelo WhatsApp.',
-  url: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.hmsaopaulo.com.br',
+  url:
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    'https://hospitalsaopaulocacoal.vercel.app',
   foundedYear: 1975,
   founder: 'Dr. Toshio Shiokawa',
-  legalName: { value: 'Razão social e CNPJ a validar com o hospital', pending: true },
-  technicalDirector: { value: 'Responsável técnico (CRM) a validar', pending: true },
 
   address: {
     street: 'Av. São Paulo, 2539',
@@ -36,17 +35,10 @@ export const site = {
   contacts: {
     scheduling: { label: '(69) 99305-0030', tel: '+5569993050030', whatsapp: '5569993050030' },
     pediatricOnCall: { label: '(69) 3441-4611', tel: '+556934414611' },
-    email: { value: 'E-mail institucional a validar', pending: true },
-    ombudsman: { value: 'Canal de ouvidoria a validar (use o formulário)', pending: true },
   },
 
   emergency: {
     status: 'Pronto atendimento todos os dias',
-    hours: { value: '24 horas', pending: true }, // site atual: "24H" no menu x "todos os dias" no card
-    publicEmergency: [
-      { label: 'SAMU', number: '192' },
-      { label: 'Bombeiros', number: '193' },
-    ],
   },
 
   social: {

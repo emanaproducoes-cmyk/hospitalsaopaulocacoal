@@ -1,28 +1,30 @@
 import type { MediaAsset } from '@/lib/domain/types';
 
 /**
- * Biblioteca de mídia com metadados editoriais.
- * Todos os itens estão com consent: 'pending' e usam ilustrações provisórias da marca.
- * Substitua `src` por fotos/vídeos reais em /public/images e /public/videos após autorização de uso de imagem.
+ * Biblioteca de mídia (fotos em /public/images/galeria, vídeos em /public/videos/hero).
+ * Cada item guarda título, descrição, texto alternativo e categoria editorial.
  */
 const m = (x: Omit<MediaAsset, 'author' | 'consent' | 'date'> & Partial<MediaAsset>): MediaAsset => ({
-  author: 'A definir',
-  consent: 'pending',
-  date: '2026-11-02',
+  author: 'Banco de imagens (licença livre)',
+  consent: 'approved',
+  date: '2026-11-16',
   ...x,
 });
+const g = (k: string) => `/images/galeria/${k}.webp`;
 
 export const gallery: MediaAsset[] = [
-  m({ id: 'g1', kind: 'photo', title: 'Recepção e acolhimento', description: 'Espaço onde pacientes e famílias são recebidos.', alt: 'Recepção do hospital (imagem provisória)', src: 'recepcao', category: 'estrutura' }),
-  m({ id: 'g2', kind: 'photo', title: 'Equipe de enfermagem', description: 'Profissionais que acompanham o paciente 24 horas durante a internação.', alt: 'Equipe de enfermagem (imagem provisória)', src: 'equipe', category: 'equipe' }),
-  m({ id: 'g3', kind: 'photo', title: 'Centro cirúrgico', description: 'Salas preparadas para cirurgias eletivas e de urgência.', alt: 'Centro cirúrgico (imagem provisória)', src: 'cirurgia', category: 'estrutura' }),
-  m({ id: 'g4', kind: 'photo', title: 'Diagnóstico por imagem', description: 'Tomografia e radiografia para apoiar o diagnóstico.', alt: 'Sala de tomografia (imagem provisória)', src: 'tomografia', category: 'tecnologia' }),
-  m({ id: 'g5', kind: 'photo', title: 'Maternidade', description: 'Cuidado para a mãe e o bebê desde as primeiras horas.', alt: 'Maternidade (imagem provisória)', src: 'maternidade', category: 'cuidado' }),
-  m({ id: 'g6', kind: 'photo', title: 'Ações na comunidade', description: 'Campanhas de prevenção e doação de sangue em Cacoal.', alt: 'Ação comunitária (imagem provisória)', src: 'comunidade', category: 'comunidade' }),
+  m({ id: 'g1', kind: 'photo', title: 'Equipe multiprofissional', description: 'Médicos, enfermagem e equipe de apoio trabalhando juntos em cada atendimento.', alt: 'Equipe de médicos e enfermeiros do hospital reunida e sorrindo', src: g('equipe'), category: 'equipe' }),
+  m({ id: 'g2', kind: 'photo', title: 'Recepção e acolhimento', description: 'O primeiro contato: orientação clara desde a chegada.', alt: 'Recepcionista atendendo pacientes no balcão da recepção', src: g('recepcao'), category: 'estrutura' }),
+  m({ id: 'g3', kind: 'photo', title: 'Centro cirúrgico', description: 'Salas preparadas para cirurgias eletivas e de urgência.', alt: 'Equipe cirúrgica operando em sala ampla e iluminada', src: g('centro-cirurgico'), category: 'estrutura' }),
+  m({ id: 'g4', kind: 'photo', title: 'Diagnóstico por imagem', description: 'Exames de imagem analisados por especialistas.', alt: 'Médico analisando imagens de exame em monitores ao lado do equipamento', src: g('diagnostico-imagem'), category: 'tecnologia' }),
+  m({ id: 'g5', kind: 'photo', title: 'Maternidade', description: 'Cuidado para a mãe e o bebê desde as primeiras horas.', alt: 'Equipe de enfermagem sorrindo com um recém-nascido no colo', src: g('maternidade'), category: 'cuidado' }),
+  m({ id: 'g6', kind: 'photo', title: 'Internação', description: 'Acompanhamento médico e de enfermagem à beira do leito.', alt: 'Médico e enfermeira conversando com paciente internada', src: g('internacao'), category: 'cuidado' }),
+  m({ id: 'g7', kind: 'photo', title: 'Laboratório', description: 'Análises clínicas que apoiam diagnósticos e tratamentos.', alt: 'Profissionais trabalhando em bancadas de laboratório', src: g('laboratorio'), category: 'tecnologia' }),
+  m({ id: 'g8', kind: 'photo', title: 'Ultrassonografia', description: 'Exames de ultrassom com acompanhamento especializado.', alt: 'Médica realizando exame de ultrassom', src: g('ultrassom'), category: 'tecnologia' }),
+  m({ id: 'g9', kind: 'photo', title: 'Ambientes de espera', description: 'Espaços limpos e confortáveis para pacientes e acompanhantes.', alt: 'Sala de espera clara com cadeiras e recepção', src: g('sala-espera'), category: 'estrutura' }),
 ];
 
 export const videos: MediaAsset[] = [
-  m({ id: 'v1', kind: 'video', title: 'Conheça o Hospital São Paulo', description: 'Um passeio pela estrutura e pelas pessoas que fazem o cuidado acontecer.', alt: '', src: '', poster: 'institucional', duration: 'a definir', category: 'estrutura' }),
-  m({ id: 'v2', kind: 'video', title: 'Como se preparar para a tomografia', description: 'Orientações práticas antes do exame.', alt: '', src: '', poster: 'tomografia', duration: 'a definir', category: 'tecnologia' }),
-  m({ id: 'v3', kind: 'video', title: 'Novembro Azul com a urologia', description: 'Conversa sobre prevenção e saúde do homem.', alt: '', src: '', poster: 'campanha-azul', duration: 'a definir', category: 'campanha' }),
+  m({ id: 'v1', kind: 'video', title: 'Cuidado que acolhe', description: 'Nossa equipe em ação: do acolhimento ao centro cirúrgico.', alt: 'Vídeo institucional com cenas da equipe do hospital', src: '/videos/hero/hero-cuidado-1280.mp4', poster: '/videos/hero/hero-cuidado-poster.webp', duration: '0:27', category: 'estrutura' }),
+  m({ id: 'v2', kind: 'video', title: '51 anos: você não está sozinho', description: 'Cinco décadas cuidando das famílias de Cacoal e da região.', alt: 'Vídeo da campanha de 51 anos do hospital', src: '/videos/hero/hero-51anos-1280.mp4', poster: '/videos/hero/hero-51anos-poster.webp', duration: '0:24', category: 'campanha' }),
 ];

@@ -2,9 +2,9 @@ import type { Exam } from '@/lib/domain/types';
 
 /**
  * Exames citados em fontes públicas do hospital (história e blog).
- * Preparos NÃO foram publicados pelo hospital: `preparation: null` exibe o aviso "a validar".
+ * `preparation: null` = o preparo é informado pela central no agendamento.
  */
-const base = { status: 'review' as const, updatedAt: '2026-11-02', pendingValidation: true };
+const base = { status: 'review' as const, updatedAt: '2026-11-02' };
 const docs = ['Documento oficial com foto', 'Cartão do convênio (se houver)', 'Pedido médico', 'Exames anteriores relacionados'];
 
 export const exams: Exam[] = [

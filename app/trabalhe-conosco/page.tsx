@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Icon } from '@/components/ui/Icon';
-import { PageHero, PendingBadge } from '@/components/ui/primitives';
+import { PageHero } from '@/components/ui/primitives';
 import { TrackedButton } from '@/components/ui/Tracked';
 import { whatsappLink } from '@/lib/integrations/whatsapp';
 
@@ -34,7 +34,7 @@ export default function TrabalheConoscoPage() {
               </li>
             ))}
           </ul>
-          <div className="notice" style={{ marginTop: '2rem' }}><Icon name="info" size={20} /><p>Vagas abertas, e-mail de RH e formulário de credenciamento serão integrados ao sistema do hospital. <PendingBadge /></p></div>
+          <div className="notice is-info" style={{ marginTop: '2rem' }}><Icon name="info" size={20} /><p>Envie seu interesse pelo WhatsApp da central informando a área de atuação. Nossa equipe retorna com as oportunidades disponíveis.</p></div>
         </div>
       </section>
     </>

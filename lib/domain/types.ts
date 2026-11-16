@@ -38,7 +38,9 @@ export interface Doctor extends Editorial {
   specialties: string[]; // slugs de Specialty
   specialtyLabel: string;
   registry: string; // CRM / RQE / CRP literal
-  bio?: string;
+  bio?: string[]; // parágrafos da biografia
+  focus?: string[]; // áreas de atuação
+  approach?: string; // frase sobre a forma de cuidar
   acceptsScheduling: boolean;
   photo?: string;
   /** Fotos do perfil, exibidas em 1080×1080 (ex.: /images/equipe/<slug>-1.webp) */
@@ -51,7 +53,7 @@ export interface Exam extends Editorial {
   category: 'imagem' | 'laboratorio' | 'cardiologico' | 'endoscopia';
   summary: string;
   whatIsIt: string;
-  preparation: string[] | null; // null = preparo a validar
+  preparation: string[] | null; // null = preparo informado no agendamento
   documents: string[];
   duration?: string | null;
   keywords: string[];
@@ -72,7 +74,9 @@ export interface Article extends Editorial {
   title: string;
   intent: 'prevencao' | 'gestacao-infancia' | 'exames' | 'comunidade' | 'servicos';
   excerpt: string;
-  body: { heading?: string; text: string }[];
+  body: { heading?: string; text?: string; list?: string[]; callout?: string }[];
+  sources?: { label: string; url?: string }[];
+  cover?: string; // capa desenhada (/images/conteudo/<slug>-capa.webp)
   author: string;
   readingMinutes: number;
   publishedAt: string;
@@ -145,6 +149,7 @@ export interface ScheduleRequest {
   specialty?: string;
   exam?: string;
   doctor?: string;
+  preferredDate?: string; // AAAA-MM-DD
   period: 'manha' | 'tarde' | 'qualquer';
   insurance: 'particular' | 'convenio' | 'nao-sei';
   name: string;
@@ -194,4 +199,7 @@ export type IconName =
   | 'plus'
   | 'minus'
   | 'contrast'
-  | 'external';
+  | 'external'
+  | 'siren'
+  | 'test-tube'
+  | 'stethoscope';

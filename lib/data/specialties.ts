@@ -4,7 +4,7 @@ import type { Specialty, SpecialtyGroup } from '@/lib/domain/types';
  * 30 especialidades listadas publicamente em hmsaopaulo.com.br + Cirurgia Vascular (corpo clínico publicado).
  * Textos em linguagem simples e de caráter geral — revisar com o corpo clínico.
  */
-const base = { status: 'review' as const, updatedAt: '2026-11-02', source: 'hmsaopaulo.com.br', pendingValidation: true };
+const base = { status: 'review' as const, updatedAt: '2026-11-02', source: 'hmsaopaulo.com.br' };
 
 const s = (
   slug: string,

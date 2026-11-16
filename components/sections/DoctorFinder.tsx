@@ -6,10 +6,10 @@ import { doctors, initials } from '@/lib/data/doctors';
 import { specialties } from '@/lib/data/specialties';
 import { normalize } from '@/lib/data/search-index';
 import { track } from '@/lib/integrations/analytics';
+import { asset } from '@/lib/asset';
 import { Icon } from '@/components/ui/Icon';
-import { Tooltip } from '@/components/ui/Tooltip';
 
-/** Busca de médicos com filtros por nome e especialidade. Filtros de convênio/agenda entram quando a API Java estiver integrada. */
+/** Busca de médicos com filtros por nome e especialidade. */
 export function DoctorFinder({ limit, initialSpecialty = '' }: { limit?: number; initialSpecialty?: string }) {
   const [q, setQ] = useState('');
   const [spec, setSpec] = useState(initialSpecialty);
@@ -43,14 +43,6 @@ export function DoctorFinder({ limit, initialSpecialty = '' }: { limit?: number;
             {usedSpecs.map((s) => <option key={s.slug} value={s.slug}>{s.name}</option>)}
           </select>
         </div>
-        <div className="field field-disabled">
-          <label htmlFor="doc-c">
-            Convênio
-            <Tooltip content="O filtro por convênio e por agenda disponível será ativado quando a lista oficial de convênios e a agenda forem integradas ao sistema do hospital." label="Por que este filtro está indisponível?" />
-          </label>
-          <select id="doc-c" disabled aria-describedby="doc-c-hint"><option>Em breve</option></select>
-          <span id="doc-c-hint" className="sr-only">Filtro indisponível até a integração com a agenda do hospital.</span>
-        </div>
       </form>
 
       <p className="finder-count" aria-live="polite">{list.length === 1 ? '1 profissional encontrado' : `${list.length} profissionais encontrados`}</p>
@@ -59,7 +51,12 @@ export function DoctorFinder({ limit, initialSpecialty = '' }: { limit?: number;
         {shown.map((d) => (
           <li key={d.slug}>
             <article className="doctor-card">
-              <span className="avatar" aria-hidden="true">{initials(d.name)}</span>
+              {d.photo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img className="avatar avatar-photo" src={asset(`${d.photo}-sm.webp`)} alt="" width={60} height={60} loading="lazy" />
+              ) : (
+                <span className="avatar" aria-hidden="true">{initials(d.name)}</span>
+              )}
               <div className="doctor-body">
                 <h3><Link href={`/medicos/${d.slug}`}>{`${d.title} ${d.name}`.trim()}</Link></h3>
                 <p className="doctor-spec">{d.specialtyLabel}</p>

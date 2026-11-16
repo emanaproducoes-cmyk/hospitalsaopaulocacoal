@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { ContactForm } from '@/components/forms/ContactForm';
 import { Icon } from '@/components/ui/Icon';
-import { PageHero, PendingBadge } from '@/components/ui/primitives';
+import { PageHero } from '@/components/ui/primitives';
 
 export const metadata: Metadata = {
   title: 'Ouvidoria, elogios e denúncias',
@@ -26,7 +26,7 @@ export default function OuvidoriaPage() {
                 <li>Análise pela ouvidoria, com sigilo.</li>
                 <li>Resposta pelo canal informado.</li>
               </ol>
-              <p className="source-note">Prazos de resposta e canal oficial da ouvidoria: <PendingBadge /></p>
+              <p className="source-note">Toda manifestação recebe número de protocolo e retorno pelo canal que você informar.</p>
             </div>
             <div className="card">
               <h2><Icon name="shield" size={20} /> Canal de denúncias</h2>

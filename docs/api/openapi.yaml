@@ -89,6 +89,7 @@ components:
         specialty: { type: string }
         exam: { type: string }
         doctor: { type: string }
+        preferredDate: { type: string, format: date, description: 'Data de preferência escolhida no calendário' }
         period: { type: string, enum: [manha, tarde, qualquer] }
         insurance: { type: string, enum: [particular, convenio, nao-sei] }
         name: { type: string, minLength: 3, maxLength: 120 }

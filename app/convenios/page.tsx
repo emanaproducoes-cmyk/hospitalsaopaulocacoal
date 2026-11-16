@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Icon } from '@/components/ui/Icon';
-import { PageHero, PendingBadge } from '@/components/ui/primitives';
+import { PageHero } from '@/components/ui/primitives';
 import { TrackedButton } from '@/components/ui/Tracked';
 import { whatsappLink } from '@/lib/integrations/whatsapp';
 
@@ -20,8 +20,8 @@ export default function ConveniosPage() {
         <div className="container grid-2">
           <div className="card">
             <h2><Icon name="shield" size={22} /> Convênios aceitos</h2>
-            <p>A lista oficial de operadoras, planos e serviços cobertos está sendo atualizada com o hospital. <PendingBadge /></p>
-            <p>Enquanto isso, a central confirma a cobertura pelo WhatsApp antes de marcar sua consulta ou exame.</p>
+            <p>O HBSP atende pacientes de diversos convênios. Como a cobertura varia conforme o plano e o procedimento, confirme com a central antes de agendar.</p>
+            <p>A central confirma a cobertura pelo WhatsApp antes de marcar sua consulta ou exame.</p>
           </div>
           <div className="card is-green">
             <h2><Icon name="file" size={22} /> Atendimento particular</h2>

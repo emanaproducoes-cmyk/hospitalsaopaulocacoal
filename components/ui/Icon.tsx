@@ -2,14 +2,17 @@ import type { IconName } from '@/lib/domain/types';
 
 /** Ícones de traço consistente (24×24, stroke 1.75). Decorativos por padrão. */
 const paths: Record<IconName, React.ReactNode> = {
-  emergency: (<><path d="M12 3v4M12 17v4M3 12h4M17 12h4" /><circle cx="12" cy="12" r="3.2" /></>),
+  emergency: (<><rect x="3.5" y="3.5" width="17" height="17" rx="4.5" /><path d="M12 7.5v9M7.5 12h9" strokeWidth={2.1} /></>),
   calendar: (<><rect x="3.5" y="5" width="17" height="15.5" rx="3" /><path d="M8 3v4M16 3v4M3.5 10h17M8 14h3M8 17h6" /></>),
-  microscope: (<><path d="M6 18h8M3 21h18M14 21a6 6 0 0 0 1.5-11.8" /><path d="m9 13 2 2 5-5-2-2-5 5ZM12.5 6.5l2-2 2 2" /></>),
+  microscope: (<><path d="M9.5 3.5l3.6 1.5-3.4 8-3.6-1.5Z" /><path d="M7.8 12.7l-.9 2" /><path d="M14 9.8a5.6 5.6 0 0 1-1.2 9.7" /><path d="M5 20.5h14M8.5 17.5h6" /><circle cx="12.2" cy="8" r=".6" /></>),
   doctor: (<><circle cx="12" cy="7.5" r="3.5" /><path d="M5 21v-1.5A6.5 6.5 0 0 1 11.5 13h1a6.5 6.5 0 0 1 6.5 6.5V21" /><path d="M9 14.5v2.5a2 2 0 0 0 4 0M15.5 14v3" /><circle cx="15.5" cy="18" r="1" /></>),
-  surgery: (<><path d="M4 20 15.5 8.5M14 4l6 6-3 1.5L12.5 7Z" /><path d="M7 14l3 3" /></>),
+  surgery: (<><path d="M3.5 20.5 11 13" strokeWidth={2} /><path d="M11 13 18.6 5.4c1.4 1.4 1.7 4.3-.4 6.6-1.7 1.8-4.2 2.6-6.1 2.4Z" /><path d="M9.2 14.8l1.6 1.6" /></>),
   bed: (<><path d="M3 18V7M3 14h18v4M21 14v-2.5A3.5 3.5 0 0 0 17.5 8H11v6" /><circle cx="7" cy="11" r="2" /></>),
   baby: (<><circle cx="12" cy="8" r="4.5" /><path d="M10.5 8h.01M13.5 8h.01M10.8 10.2a2 2 0 0 0 2.4 0" /><path d="M7 21v-2a5 5 0 0 1 10 0v2" /></>),
   child: (<><circle cx="12" cy="5.5" r="2.5" /><path d="M8 21l1.5-7L6 11l2-2 4 2 4-2 2 2-3.5 3L16 21M12 14v3" /></>),
+  siren: (<><path d="M7 18v-5.5a5 5 0 0 1 10 0V18" /><path d="M5 18h14v3H5Z" /><path d="M12 2.5v2M4.6 5.6l1.4 1.4M19.4 5.6 18 7M2.5 12.5h2M19.5 12.5h2" /><path d="M10 13.5a2 2 0 0 1 2-2" /></>),
+  'test-tube': (<><path d="M14.5 3.5 20.5 9.5" /><path d="M16 5 7 14a3.2 3.2 0 0 0 4.5 4.5L20.5 9.5" /><path d="M9.2 11.8h7" /><path d="M9 15.2h.01M11.5 15.6h.01" /></>),
+  stethoscope: (<><path d="M5 3.5v5a4.5 4.5 0 0 0 9 0v-5" /><path d="M9.5 13v2.5a4.5 4.5 0 0 0 9 0V13" /><circle cx="18.5" cy="11" r="2" /></>),
   heart: (<path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.6C19.5 15.4 12 20 12 20Z" />),
   scan: (<><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2" /><circle cx="12" cy="12" r="3.5" /></>),
   phone: (<path d="M5 3.5h3.2l1.6 4-2.1 1.3a11 11 0 0 0 5.5 5.5l1.3-2.1 4 1.6V17A3 3 0 0 1 15.5 20 13.5 13.5 0 0 1 4 8.5 3 3 0 0 1 5 3.5Z" />),

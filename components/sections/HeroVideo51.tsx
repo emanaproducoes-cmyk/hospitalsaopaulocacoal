@@ -4,8 +4,19 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Icon } from '@/components/ui/Icon';
 import { TrackedButton } from '@/components/ui/Tracked';
 
-/** Os dois vídeos do hero (últimas versões), tocados em sequência e em loop infinito. */
+/** Hero: primeiro o vídeo (clipes), depois o banner animado dos 51 anos; loop infinito entre os dois. */
 const VIDEOS = [
+  {
+    id: 'cuidado',
+    name: 'hero-cuidado',
+    label: 'Cuidado que acolhe. Saúde que acompanha você.',
+    phrases: [
+      'Cuidado que acolhe.',
+      'Saúde que acompanha você.',
+      'Desde 1975, cuidando de Cacoal e da região.',
+      'Precisa de atendimento? Agende em minutos pelo WhatsApp. Pronto atendimento todos os dias.',
+    ],
+  },
   {
     id: '51anos',
     name: 'hero-51anos',
@@ -17,17 +28,6 @@ const VIDEOS = [
       'Centenas de nascimentos. Um só carinho.',
       'Gerações de Cacoal confiam em nós.',
       'Cuidado que acolhe. Saúde que acompanha.',
-    ],
-  },
-  {
-    id: 'cuidado',
-    name: 'hero-cuidado',
-    label: 'Cuidado que acolhe. Saúde que acompanha você.',
-    phrases: [
-      'Cuidado que acolhe.',
-      'Saúde que acompanha você.',
-      'Desde 1975, cuidando de Cacoal e da região.',
-      'Precisa de atendimento? Agende em minutos pelo WhatsApp. Pronto atendimento todos os dias.',
     ],
   },
 ];
@@ -162,6 +162,16 @@ export function HeroVideo51() {
     return () => { v.removeEventListener('timeupdate', onTime); v.removeEventListener('ended', onEnded); };
   }, [active, ready, crossTo]);
 
+  // navegação manual entre os banners (anterior / próximo / indicadores)
+  const goTo = (i: number) => {
+    if (i === active) return;
+    if (fallback) { setActive(i); setSweep((k) => k + 1); return; }
+    switching.current = false;
+    crossTo(i);
+  };
+  const next = () => goTo((active + 1) % VIDEOS.length);
+  const prev = () => goTo((active - 1 + VIDEOS.length) % VIDEOS.length);
+
   const toggle = () => {
     const v = refs.current[active];
     if (!v) return;
@@ -170,7 +180,7 @@ export function HeroVideo51() {
 
   return (
     <section className="hero51" aria-labelledby="hero51-title">
-      <h1 id="hero51-title" className="sr-only">{VIDEOS[0].label}</h1>
+      <h1 id="hero51-title" className="sr-only">Hospital São Paulo de Cacoal, 51 anos: cuidado que acolhe, saúde que acompanha você.</h1>
       <div className="sr-only">
         {VIDEOS.map((v) => (
           <ul key={v.id}>{v.phrases.map((p) => <li key={p}>{p}</li>)}</ul>
@@ -188,7 +198,8 @@ export function HeroVideo51() {
             poster={`${prefix}${v.name}-poster.webp`}
             muted
             playsInline
-            preload={i === 0 ? 'metadata' : 'none'}
+            preload={i === 0 ? 'auto' : 'none'}
+            autoPlay={i === 0}
             aria-hidden="true"
             tabIndex={-1}
           >
@@ -210,6 +221,17 @@ export function HeroVideo51() {
           <div className="hero51-actions">
             <TrackedButton href="/agendar?origem=hero-video" event="click_schedule" params={{ origin: 'hero-video' }} icon="calendar">Agendar consulta</TrackedButton>
             <TrackedButton href="/pronto-atendimento" event="click_emergency" params={{ origin: 'hero-video' }} variant="white" icon="emergency">Pronto atendimento</TrackedButton>
+          </div>
+          <button type="button" className="hero51-nav is-prev" onClick={prev} aria-label="Banner anterior">
+            <Icon name="arrow-left" size={20} />
+          </button>
+          <button type="button" className="hero51-nav is-next" onClick={next} aria-label="Próximo banner">
+            <Icon name="arrow-right" size={20} />
+          </button>
+          <div className="hero51-dots" role="group" aria-label="Escolher banner">
+            {VIDEOS.map((v, i) => (
+              <button key={v.id} type="button" className={active === i ? 'is-on' : ''} aria-label={`Banner ${i + 1} de ${VIDEOS.length}`} aria-current={active === i ? 'true' : undefined} onClick={() => goTo(i)} />
+            ))}
           </div>
           {ready && (
             <button type="button" className="hero51-toggle" onClick={toggle} aria-label={paused ? 'Reproduzir vídeos do banner' : 'Pausar vídeos do banner'}>

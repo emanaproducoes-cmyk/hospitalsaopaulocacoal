@@ -40,7 +40,7 @@ export default function AgendarPage() {
           </div>
           <div className="card is-alert">
             <h2>É urgente?</h2>
-            <p>Não agende. Venha ao pronto atendimento ou, se houver risco de vida, ligue 192.</p>
+            <p>Não agende. Venha direto ao pronto atendimento, aberto todos os dias, ou ligue para o hospital e peça orientação.</p>
           </div>
         </aside>
       </div>

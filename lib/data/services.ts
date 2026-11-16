@@ -1,6 +1,6 @@
 import type { Service } from '@/lib/domain/types';
 
-const base = { status: 'review' as const, updatedAt: '2026-11-02', source: 'hmsaopaulo.com.br/servicos', pendingValidation: true };
+const base = { status: 'review' as const, updatedAt: '2026-11-02', source: 'hmsaopaulo.com.br/servicos' };
 
 export const services: Service[] = [
   {
@@ -44,7 +44,7 @@ export const services: Service[] = [
     description:
       'Exames de imagem, endoscopia e análises laboratoriais para apoiar o diagnóstico e o acompanhamento de tratamentos.',
     highlights: ['Tomografia computadorizada', 'Radiografia e endoscopia', 'Laboratório de análises clínicas'],
-    icon: 'scan',
+    icon: 'microscope',
     cta: { label: 'Ver exames e preparo', href: '/exames', hint: 'Abre a lista de exames' },
   },
   {

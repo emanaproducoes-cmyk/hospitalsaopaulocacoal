@@ -170,7 +170,7 @@ export function SiteHeader() {
           </button>
         </div>
         <Link href="/pronto-atendimento" className="drawer-emergency" onClick={() => { setDrawer(false); track('click_emergency', { origin: 'drawer' }); }}>
-          <Icon name="emergency" size={22} /> Estou com uma urgência
+          <Icon name="siren" size={22} /> Estou com uma urgência
         </Link>
         <nav aria-label="Menu móvel">
           <ul className="drawer-nav">

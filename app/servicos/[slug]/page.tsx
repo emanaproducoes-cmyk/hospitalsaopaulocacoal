@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Artwork } from '@/components/ui/Artwork';
 import { Icon } from '@/components/ui/Icon';
-import { PageHero, PendingBadge } from '@/components/ui/primitives';
+import { PageHero } from '@/components/ui/primitives';
 import { TrackedButton, TrackView } from '@/components/ui/Tracked';
 import { getService, services } from '@/lib/data/services';
 import { site } from '@/lib/data/site';
@@ -11,7 +11,7 @@ import { whatsappLink } from '@/lib/integrations/whatsapp';
 
 type Props = { params: Promise<{ slug: string }> };
 
-const art: Record<string, string> = { 'centro-cirurgico': 'cirurgia', internacao: 'equipe', maternidade: 'maternidade', 'plantao-pediatrico': 'pediatria', hotelaria: 'recepcao', diagnostico: 'tomografia', 'pronto-atendimento': 'hospital' };
+const art: Record<string, string> = { 'centro-cirurgico': 'cirurgia', internacao: 'internacao', maternidade: 'parto', 'plantao-pediatrico': 'pediatria', hotelaria: 'sala-espera', diagnostico: 'tomografia', 'pronto-atendimento': 'enfermagem' };
 
 export async function generateStaticParams() {
   return services.filter((s) => !['pronto-atendimento', 'diagnostico'].includes(s.slug)).map((s) => ({ slug: s.slug }));
@@ -48,7 +48,7 @@ export default async function ServicePage({ params }: Props) {
                 <h2>Antes da internação</h2>
                 <p>Separe documento com foto, cartão do convênio, exames e receitas recentes e a lista de remédios em uso. Traga itens de higiene e roupas confortáveis.</p>
                 <h2>Acompanhantes e visitas</h2>
-                <p>Crianças, adolescentes, idosos, gestantes e pessoas com deficiência têm direito a acompanhante. Horários de visita e regras de troca serão publicados após validação. <PendingBadge /></p>
+                <p>Crianças, adolescentes, idosos, gestantes e pessoas com deficiência têm direito a acompanhante. Os horários de visita e as regras de troca de acompanhante são informados pela recepção da internação.</p>
                 <p><Link href="/pacientes-e-acompanhantes">Ver o guia completo para pacientes e acompanhantes</Link></p>
               </>
             )}
@@ -67,7 +67,7 @@ export default async function ServicePage({ params }: Props) {
               <>
                 <h2>Do pré-natal ao pós-parto</h2>
                 <p>Converse com a equipe sobre o seu plano de parto, acompanhante, alívio da dor e contato pele a pele com o bebê. <Link href="/conteudo/parto-humanizado">Leia sobre parto humanizado</Link>.</p>
-                <p>Visita à maternidade, enxoval e documentos para internação: informações a validar com o hospital. <PendingBadge /></p>
+                <p>Para a internação do parto, leve documento com foto, cartão do pré-natal, exames recentes e cartão do convênio. Na mala da maternidade, roupas confortáveis, itens de higiene e as primeiras roupinhas do bebê.</p>
               </>
             )}
             {pediatric && (

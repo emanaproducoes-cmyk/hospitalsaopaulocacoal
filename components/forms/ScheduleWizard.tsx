@@ -11,6 +11,7 @@ import { currentOrigin, track } from '@/lib/integrations/analytics';
 import { whatsappLink } from '@/lib/integrations/whatsapp';
 import { Icon } from '@/components/ui/Icon';
 import { Tooltip } from '@/components/ui/Tooltip';
+import { DatePicker, formatDateBR } from './DatePicker';
 import type { ScheduleRequest } from '@/lib/domain/types';
 
 type Data = {
@@ -18,6 +19,7 @@ type Data = {
   specialty: string;
   exam: string;
   doctor: string;
+  date: string; // AAAA-MM-DD (data de preferência)
   period: ScheduleRequest['period'];
   insurance: ScheduleRequest['insurance'];
   name: string;
@@ -26,7 +28,7 @@ type Data = {
   website: string; // honeypot anti-spam
 };
 
-const steps = ['Tipo', 'O quê', 'Preferências', 'Seus dados'];
+const steps = ['Tipo', 'O quê', 'Data e horário', 'Seus dados'];
 const maskPhone = (v: string) => {
   const d = v.replace(/\D/g, '').slice(0, 11);
   if (d.length <= 2) return d;
@@ -40,7 +42,7 @@ export function ScheduleWizard() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<'idle' | 'sending' | 'done'>('idle');
   const [result, setResult] = useState<{ protocol?: string; wa: string } | null>(null);
-  const [d, setD] = useState<Data>({ type: '', specialty: '', exam: '', doctor: '', period: 'qualquer', insurance: 'nao-sei', name: '', phone: '', consent: false, website: '' });
+  const [d, setD] = useState<Data>({ type: '', specialty: '', exam: '', doctor: '', date: '', period: 'qualquer', insurance: 'nao-sei', name: '', phone: '', consent: false, website: '' });
 
   useEffect(() => {
     const p = new URLSearchParams(window.location.search);
@@ -61,6 +63,7 @@ export function ScheduleWizard() {
     if (s === 0 && !d.type) e.type = 'Escolha o tipo de atendimento.';
     if (s === 1 && d.type !== 'exame' && !d.specialty) e.specialty = 'Escolha uma especialidade ou "Não sei".';
     if (s === 1 && d.type === 'exame' && !d.exam) e.exam = 'Escolha o exame.';
+    if (s === 2 && !d.date) e.date = 'Escolha no calendário a data de sua preferência.';
     if (s === 3) {
       if (d.name.trim().length < 3) e.name = 'Informe seu nome (mínimo 3 letras).';
       if (d.phone.replace(/\D/g, '').length < 10) e.phone = 'Informe um telefone com DDD.';
@@ -86,6 +89,7 @@ export function ScheduleWizard() {
     exam: exams.find((x) => x.slug === d.exam)?.name ?? '',
     doctor: doctors.find((x) => x.slug === d.doctor)?.name ?? '',
     period: { manha: 'Manhã', tarde: 'Tarde', qualquer: 'Qualquer horário' }[d.period],
+    date: formatDateBR(d.date),
     ins: { particular: 'Particular', convenio: 'Convênio', 'nao-sei': 'Ainda não sei' }[d.insurance],
   };
 
@@ -99,7 +103,8 @@ export function ScheduleWizard() {
       `Olá! Meu nome é ${d.name.trim()}. Gostaria de agendar ${d.type === 'exame' ? 'um exame' : d.type === 'retorno' ? 'um retorno' : 'uma consulta'}.`,
       d.type === 'exame' ? `Exame: ${label.exam}` : `Especialidade: ${label.spec}`,
       label.doctor ? `Profissional de preferência: ${label.doctor}` : '',
-      `Período: ${label.period} · Atendimento: ${label.ins}`,
+      `Data de preferência: ${label.date} · Período: ${label.period}`,
+      `Atendimento: ${label.ins}`,
     ].filter(Boolean).join('\n');
     const wa = whatsappLink({ intent: `Agendar ${d.type}`, origin, text });
     const res = await api.scheduleRequest({
@@ -107,6 +112,7 @@ export function ScheduleWizard() {
       specialty: d.specialty || undefined,
       exam: d.exam || undefined,
       doctor: d.doctor || undefined,
+      preferredDate: d.date,
       period: d.period,
       insurance: d.insurance,
       name: d.name.trim(),
@@ -169,7 +175,7 @@ export function ScheduleWizard() {
             ))}
           </div>
           {errors.type && <p className="error" id="err-type">{errors.type}</p>}
-          <p className="wizard-alert"><Icon name="emergency" size={18} /> É uma urgência? Não agende — <Link href="/pronto-atendimento">veja o pronto atendimento</Link> ou ligue 192.</p>
+          <p className="wizard-alert"><Icon name="emergency" size={18} /> É uma urgência? Não agende — <Link href="/pronto-atendimento">venha ao pronto atendimento</Link>, aberto todos os dias.</p>
         </fieldset>
       )}
 
@@ -214,7 +220,13 @@ export function ScheduleWizard() {
 
       {step === 2 && (
         <fieldset className="wizard-panel">
-          <legend>Suas preferências</legend>
+          <legend>Escolha a data e o período</legend>
+          <div className="field">
+            <span className="label" id="lbl-date">Data de preferência</span>
+            <DatePicker value={d.date} onChange={(v) => set('date', v)} disableSundays={false} invalid={!!errors.date} describedBy={errors.date ? 'err-date' : 'hint-date'} />
+            <span className="hint" id="hint-date">{d.date ? `Selecionado: ${formatDateBR(d.date)}. ` : ''}A central confirma o horário disponível nessa data.</span>
+            {errors.date && <p className="error" id="err-date">{errors.date}</p>}
+          </div>
           <div className="field">
             <span className="label" id="lbl-period">Melhor período</span>
             <div className="seg" role="radiogroup" aria-labelledby="lbl-period">
@@ -247,7 +259,7 @@ export function ScheduleWizard() {
         <fieldset className="wizard-panel">
           <legend>Para a central falar com você</legend>
           <div className="summary">
-            <p><strong>Resumo:</strong> {d.type === 'exame' ? label.exam : label.spec}{label.doctor && ` · ${label.doctor}`} · {label.period} · {label.ins}</p>
+            <p><strong>Resumo:</strong> {d.type === 'exame' ? label.exam : label.spec}{label.doctor && ` · ${label.doctor}`} · {label.date} · {label.period} · {label.ins}</p>
           </div>
           <div className="field-row">
             <div className="field">

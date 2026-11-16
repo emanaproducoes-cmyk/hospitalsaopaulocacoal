@@ -1,10 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { asset } from '@/lib/asset';
 import type { MediaAsset } from '@/lib/domain/types';
-import { Artwork } from '@/components/ui/Artwork';
 import { Icon } from '@/components/ui/Icon';
-import { PendingBadge } from '@/components/ui/primitives';
 import { site } from '@/lib/data/site';
 import { track } from '@/lib/integrations/analytics';
 
@@ -25,7 +24,8 @@ export function PhotoGallery({ items }: { items: MediaAsset[] }) {
         {items.map((it, i) => (
           <li key={it.id} className={`g-item g-${i}`}>
             <button type="button" ref={(el) => { triggers.current[i] = el; }} onClick={() => setOpen(i)} aria-label={`Ampliar foto: ${it.title}`}>
-              <Artwork name={it.src} ratio={i === 0 ? '4 / 5' : '4 / 3'} showTag={false} />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className="g-img" src={asset(it.src.replace('.webp', i === 0 ? '.webp' : '-sm.webp'))} alt={it.alt} loading="lazy" decoding="async" />
               <span className="g-caption"><strong>{it.title}</strong><small>{it.description}</small></span>
             </button>
           </li>
@@ -79,10 +79,11 @@ function Lightbox({ items, index, onIndex, onClose }: { items: MediaAsset[]; ind
           if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) (dx < 0 ? next : prev)();
         }}
       >
-        <Artwork name={it.src} ratio="16 / 10" alt={it.alt} />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="lb-img" src={asset(it.src)} alt={it.alt} />
         <figcaption>
           <strong>{it.title}</strong> — {it.description}
-          <span className="lb-meta">Foto {index + 1} de {items.length} · Autorização de uso: {it.consent === 'approved' ? 'aprovada' : 'pendente'}</span>
+          <span className="lb-meta">Foto {index + 1} de {items.length}</span>
         </figcaption>
       </figure>
       <button type="button" className="lb-btn lb-close" onClick={onClose} aria-label="Fechar galeria"><Icon name="close" size={24} /></button>
@@ -94,18 +95,25 @@ function Lightbox({ items, index, onIndex, onClose }: { items: MediaAsset[]; ind
 
 /* ======================= VÍDEOS ======================= */
 export function VideoCard({ v }: { v: MediaAsset }) {
+  const [playing, setPlaying] = useState(false);
   return (
     <article className="video-card">
       <div className="video-thumb">
-        <Artwork name={v.poster ?? 'institucional'} ratio="16 / 9" showTag={false} />
-        <span className="video-play" aria-hidden="true"><Icon name="play" size={26} /></span>
-        <span className="video-duration">{v.duration}</span>
+        {playing ? (
+          <video src={asset(v.src)} poster={asset(v.poster ?? '')} controls autoPlay muted playsInline aria-label={v.alt} />
+        ) : (
+          <button type="button" className="video-cover" onClick={() => setPlaying(true)} aria-label={`Assistir: ${v.title}`}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={asset(v.poster ?? '')} alt="" loading="lazy" />
+            <span className="video-play" aria-hidden="true"><Icon name="play" size={26} /></span>
+            <span className="video-duration">{v.duration}</span>
+          </button>
+        )}
       </div>
       <div className="video-body">
-        <p className="video-cat">{v.category}</p>
+        <p className="video-cat">{v.category === 'campanha' ? 'Campanha' : 'Institucional'}</p>
         <h3>{v.title}</h3>
         <p>{v.description}</p>
-        <p className="video-meta">Vídeo em produção <PendingBadge text="a publicar" /></p>
       </div>
     </article>
   );

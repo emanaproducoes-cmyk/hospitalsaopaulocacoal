@@ -11,7 +11,7 @@ export function MobileActionBar() {
   return (
     <nav className="mobile-bar" aria-label="Ações rápidas">
       <Link href="/pronto-atendimento" className="mb-item is-alert" onClick={() => track('click_emergency', { origin: 'mobile-bar' })}>
-        <Icon name="emergency" size={22} /><span>Urgência</span>
+        <Icon name="siren" size={22} /><span>Urgência</span>
       </Link>
       <Link href="/agendar" className="mb-item" onClick={() => track('click_schedule', { origin: 'mobile-bar' })}>
         <Icon name="calendar" size={22} /><span>Agendar</span>

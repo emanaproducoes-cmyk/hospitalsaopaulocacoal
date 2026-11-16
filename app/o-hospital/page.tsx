@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { TrustSection } from '@/components/sections/HomeSections';
 import { PhotoGallery, VideoCard } from '@/components/sections/MediaSections';
 import { Icon } from '@/components/ui/Icon';
-import { Logo, PageHero, PendingBadge, SectionHeading } from '@/components/ui/primitives';
+import { Logo, PageHero, SectionHeading } from '@/components/ui/primitives';
 import { gallery, videos } from '@/lib/data/media';
 import { site } from '@/lib/data/site';
 
@@ -32,7 +32,6 @@ export default function HospitalPage() {
               <li key={v.title}><article className="service-card"><span className="service-icon"><Icon name={v.icon} size={28} /></span><h3>{v.title}</h3><p>{v.text}</p></article></li>
             ))}
           </ul>
-          <p className="center source-note" style={{ marginTop: '1.5rem' }}>Missão, visão e valores oficiais a validar com a diretoria. <PendingBadge /></p>
         </div>
       </section>
 

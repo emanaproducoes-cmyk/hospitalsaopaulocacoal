@@ -5,7 +5,7 @@ import { DoctorFinder } from '@/components/sections/DoctorFinder';
 import { ArticleCard } from '@/components/sections/ContentBlocks';
 import { Artwork } from '@/components/ui/Artwork';
 import { Icon } from '@/components/ui/Icon';
-import { JsonLd, PageHero, PendingBadge } from '@/components/ui/primitives';
+import { JsonLd, PageHero } from '@/components/ui/primitives';
 import { TrackedButton, TrackView } from '@/components/ui/Tracked';
 import { articles } from '@/lib/data/articles';
 import { doctorsBySpecialty } from '@/lib/data/doctors';
@@ -40,7 +40,7 @@ export default async function SpecialtyPage({ params }: Props) {
         eyebrow={specialtyGroups[s.group]}
         title={s.name}
         intro={s.summary}
-        art={<Artwork name={s.group === 'mulher-crianca' ? 'pediatria' : s.group === 'cirurgicas' ? 'cirurgia' : s.group === 'diagnostico' ? 'tomografia' : 'equipe'} ratio="4 / 3" />}
+        art={<Artwork name={({ 'mulher-crianca': s.slug.includes('obstetr') || s.slug === 'ginecologia' ? 'parto' : 'pediatria', cirurgicas: 'cirurgia-equipe', diagnostico: s.slug === 'bioquimica' ? 'laboratorio' : 'ultrassom', clinicas: s.slug.startsWith('neuro') ? 'neuro-imagem' : 'consulta', multiprofissional: 'internacao' } as Record<string, string>)[s.group]} ratio="4 / 3" />}
       >
         <TrackedButton href={`/agendar?especialidade=${s.slug}&origem=especialidade`} event="click_schedule" params={{ origin: 'specialty', specialty: s.slug }} icon="calendar" size="lg">Agendar consulta</TrackedButton>
         <TrackedButton href={whatsappLink({ intent: `Dúvida ${s.name}`, origin: `especialidade-${s.slug}` })} event="click_whatsapp" params={{ origin: 'specialty', specialty: s.slug }} variant="secondary" icon="whatsapp" size="lg">Tirar dúvida</TrackedButton>
@@ -51,7 +51,7 @@ export default async function SpecialtyPage({ params }: Props) {
           <div className="prose">
             <h2>Quando procurar {s.name.toLowerCase()}</h2>
             <ul>{s.whenToSeek.map((w) => <li key={w}>{w}</li>)}</ul>
-            <div className="notice"><Icon name="info" size={20} /><p>Texto de caráter geral, em revisão pelo corpo clínico. Não substitui uma consulta. <PendingBadge text="revisão médica" /></p></div>
+            <div className="notice"><Icon name="info" size={20} /><p>Texto de caráter informativo. Não substitui a avaliação de um profissional de saúde.</p></div>
             <h2>Profissionais</h2>
           </div>
           <aside>

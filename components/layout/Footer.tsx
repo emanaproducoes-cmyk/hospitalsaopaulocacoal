@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { footerLinks, site } from '@/lib/data/site';
 import { Icon } from '@/components/ui/Icon';
-import { Logo, PendingBadge } from '@/components/ui/primitives';
+import { Logo } from '@/components/ui/primitives';
 import { CookieSettingsButton } from './CookieConsent';
 
 export function Footer() {
@@ -9,7 +9,7 @@ export function Footer() {
     <footer className="site-footer">
       <div className="footer-band">
         <div className="container footer-band-inner">
-          <p><strong>Em uma emergência com risco de vida, ligue 192 (SAMU).</strong> Para outras urgências, venha ao pronto atendimento.</p>
+          <p><strong>Dor no peito, falta de ar, sinais de AVC ou acidente?</strong> Venha imediatamente ao pronto atendimento, aberto todos os dias.</p>
           <Link href="/pronto-atendimento" className="text-link on-dark">Ver orientações <Icon name="arrow-right" size={16} /></Link>
         </div>
       </div>
@@ -40,12 +40,11 @@ export function Footer() {
           <p><Icon name="pin" size={18} /> <span>{site.address.street} – {site.address.district}<br />{site.address.city} – {site.address.state}, {site.address.zip}</span></p>
           <p><Icon name="whatsapp" size={18} /> <span>Agendamentos: <a href={`tel:${site.contacts.scheduling.tel}`}>{site.contacts.scheduling.label}</a></span></p>
           <p><Icon name="child" size={18} /> <span>Plantão pediátrico: <a href={`tel:${site.contacts.pediatricOnCall.tel}`}>{site.contacts.pediatricOnCall.label}</a></span></p>
-          <p><Icon name="mail" size={18} /> <span>{site.contacts.email.value} <PendingBadge /></span></p>
         </address>
       </div>
       <div className="container footer-legal">
-        <p>© 2026 {site.name}. {site.legalName.value} <PendingBadge /></p>
-        <p>{site.technicalDirector.value} <PendingBadge /> · Conteúdo informativo: não substitui consulta médica.</p>
+        <p>© 2026 {site.name}. Todos os direitos reservados.</p>
+        <p>Conteúdo informativo: não substitui a consulta com um profissional de saúde.</p>
         <p className="footer-legal-links">
           <Link href="/privacidade">Privacidade</Link>
           <Link href="/privacidade#cookies">Cookies</Link>

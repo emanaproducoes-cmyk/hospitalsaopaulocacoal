@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { JourneyTabs } from '@/components/sections/JourneyTabs';
 import { FAQList } from '@/components/sections/ContentBlocks';
 import { Icon } from '@/components/ui/Icon';
-import { PageHero, PendingBadge, SectionHeading } from '@/components/ui/primitives';
+import { PageHero, SectionHeading } from '@/components/ui/primitives';
 import { TrackedButton } from '@/components/ui/Tracked';
 import { faqs } from '@/lib/data/faq';
 
@@ -35,7 +35,7 @@ export default function PacientesPage() {
           <div className="card">
             <h2><Icon name="users" size={22} /> Visitas e acompanhantes</h2>
             <p>Têm direito a acompanhante: crianças e adolescentes (ECA), idosos (Estatuto da Pessoa Idosa), gestantes no parto e pós-parto e pessoas com deficiência.</p>
-            <p>Horários de visita, número de visitantes e regras de troca de acompanhante: <PendingBadge text="a validar com o hospital" /></p>
+            <p>Horários de visita, número de visitantes e regras de troca de acompanhante são informados pela recepção da internação.</p>
             <ul className="icon-list">
               <li><Icon name="shield" size={20} /><span>Higienize as mãos ao entrar e sair do quarto.</span></li>
               <li><Icon name="info" size={20} /><span>Evite visitar se estiver gripado ou com febre.</span></li>

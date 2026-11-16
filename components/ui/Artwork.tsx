@@ -1,55 +1,44 @@
-import type { IconName } from '@/lib/domain/types';
-import { Icon } from './Icon';
+import { asset } from '@/lib/asset';
 
 /**
- * Ilustração PROVISÓRIA da marca, usada no lugar de fotos reais ainda não autorizadas.
- * Quando a foto real existir, troque <Artwork/> por <Image src="/images/..."/> com o mesmo `alt`.
+ * Foto de apoio das seções (arquivos em /public/images/galeria).
+ * Mantém a API antiga (<Artwork name="..."/>) para que todas as páginas usem as fotos reais.
  */
-const presets: Record<string, { icon: IconName; a: string; b: string; label: string }> = {
-  hero: { icon: 'heart', a: '#2FA441', b: '#294197', label: 'Foto do hero' },
-  recepcao: { icon: 'users', a: '#DCEFE0', b: '#C9D5F2', label: 'Recepção' },
-  equipe: { icon: 'doctor', a: '#C9D5F2', b: '#DCEFE0', label: 'Equipe' },
-  cirurgia: { icon: 'surgery', a: '#D3E3F7', b: '#E4F2E7', label: 'Centro cirúrgico' },
-  tomografia: { icon: 'scan', a: '#E1E8F8', b: '#D7EEDC', label: 'Diagnóstico' },
-  maternidade: { icon: 'baby', a: '#E7F4EA', b: '#DCE4F8', label: 'Maternidade' },
-  comunidade: { icon: 'users', a: '#DDEFE1', b: '#E2E7F7', label: 'Comunidade' },
-  pediatria: { icon: 'child', a: '#E3F1E6', b: '#D8E2F7', label: 'Pediatria' },
-  institucional: { icon: 'hotel', a: '#D6E0F6', b: '#DFF0E3', label: 'Institucional' },
-  'campanha-azul': { icon: 'heart', a: '#BFD0F3', b: '#E5ECFB', label: 'Novembro Azul' },
-  'campanha-rosa': { icon: 'heart', a: '#F6D9E4', b: '#FBEFF4', label: 'Outubro Rosa' },
-  doacao: { icon: 'drop', a: '#F4DADA', b: '#E7EDF9', label: 'Doação de sangue' },
-  hospital: { icon: 'hotel', a: '#D9E3F7', b: '#E1F1E5', label: 'Fachada do hospital' },
+const photos: Record<string, { file: string; alt: string }> = {
+  hero: { file: 'equipe', alt: 'Equipe do Hospital São Paulo' },
+  equipe: { file: 'equipe', alt: 'Equipe multiprofissional do hospital' },
+  recepcao: { file: 'recepcao', alt: 'Recepção do hospital atendendo pacientes' },
+  cirurgia: { file: 'centro-cirurgico', alt: 'Equipe cirúrgica em sala de cirurgia' },
+  'cirurgia-equipe': { file: 'cirurgia-equipe', alt: 'Cirurgiões durante procedimento' },
+  tomografia: { file: 'tomografia', alt: 'Sala de exame de imagem com tomógrafo' },
+  'tomografia-paciente': { file: 'tomografia-paciente', alt: 'Paciente realizando exame no tomógrafo' },
+  'raio-x': { file: 'raio-x', alt: 'Profissional analisando radiografia de tórax' },
+  'raio-x-leitura': { file: 'raio-x-leitura', alt: 'Médicos analisando radiografia no negatoscópio' },
+  laboratorio: { file: 'laboratorio', alt: 'Laboratório de análises clínicas' },
+  coleta: { file: 'coleta', alt: 'Tubo de coleta de sangue em mão com luva' },
+  ultrassom: { file: 'ultrassom', alt: 'Médica realizando exame de ultrassom' },
+  maternidade: { file: 'maternidade', alt: 'Equipe com recém-nascido na maternidade' },
+  parto: { file: 'parto', alt: 'Pai e mãe com o recém-nascido logo após o parto' },
+  pediatria: { file: 'pediatria', alt: 'Médico conversando com criança e mãe em consulta' },
+  internacao: { file: 'internacao', alt: 'Médico e enfermeira atendendo paciente internada' },
+  consulta: { file: 'consulta', alt: 'Médico conversando com paciente em consultório' },
+  enfermagem: { file: 'enfermagem', alt: 'Equipe de enfermagem no corredor do hospital' },
+  'sala-espera': { file: 'sala-espera', alt: 'Sala de espera do hospital' },
+  hall: { file: 'hall', alt: 'Corredor do hospital' },
+  'neuro-imagem': { file: 'neuro-imagem', alt: 'Médico analisando exame de imagem do cérebro' },
+  institucional: { file: 'sala-espera', alt: 'Ambiente do hospital' },
+  hospital: { file: 'sala-espera', alt: 'Ambiente do hospital' },
+  comunidade: { file: 'equipe', alt: 'Equipe do hospital' },
+  'campanha-azul': { file: 'consulta', alt: 'Médico em consulta com paciente' },
+  doacao: { file: 'coleta', alt: 'Coleta de sangue' },
 };
 
-export function Artwork({ name, ratio = '4 / 3', className, showTag = true, alt }: { name: string; ratio?: string; className?: string; showTag?: boolean; alt?: string }) {
-  const p = presets[name] ?? presets.institucional;
-  const id = `art-${name}`;
+export function Artwork({ name, ratio = '4 / 3', className, alt, small = false }: { name: string; ratio?: string; className?: string; showTag?: boolean; alt?: string; small?: boolean }) {
+  const p = photos[name] ?? photos.equipe;
   return (
-    <div className={`artwork ${className ?? ''}`} style={{ aspectRatio: ratio }} role={alt ? 'img' : undefined} aria-label={alt} aria-hidden={alt ? undefined : true}>
-      <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-        <defs>
-          <linearGradient id={`${id}-g`} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor={p.a} />
-            <stop offset="1" stopColor={p.b} />
-          </linearGradient>
-          <radialGradient id={`${id}-r`} cx="0.78" cy="0.2" r="0.7">
-            <stop offset="0" stopColor="#fff" stopOpacity=".75" />
-            <stop offset="1" stopColor="#fff" stopOpacity="0" />
-          </radialGradient>
-        </defs>
-        <rect width="400" height="300" fill={`url(#${id}-g)`} />
-        <rect width="400" height="300" fill={`url(#${id}-r)`} />
-        <g fill="none" stroke="#fff" strokeOpacity=".55">
-          <circle cx="330" cy="250" r="90" />
-          <circle cx="330" cy="250" r="140" />
-          <circle cx="330" cy="250" r="190" />
-          <circle cx="60" cy="40" r="70" strokeOpacity=".35" />
-        </g>
-      </svg>
-      <span className="artwork-icon">
-        <Icon name={p.icon} size={34} />
-      </span>
-      {showTag && <span className="artwork-tag">Foto real a inserir · {p.label}</span>}
+    <div className={`artwork is-photo ${className ?? ''}`} style={{ aspectRatio: ratio }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={asset(`/images/galeria/${p.file}${small ? '-sm' : ''}.webp`)} alt={alt ?? p.alt} loading="lazy" decoding="async" />
     </div>
   );
 }
