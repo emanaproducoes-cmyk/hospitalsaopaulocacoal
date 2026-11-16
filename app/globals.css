@@ -953,3 +953,123 @@
   .dp-dot { display: inline-block; width: 12px; height: 12px; border-radius: 4px; margin-right: -0.5rem; }
   .dp-dot.is-selected { background: var(--brand-blue); } .dp-dot.is-today { box-shadow: inset 0 0 0 1.5px var(--brand-green); } .dp-dot.is-off { background: var(--line); }
 }
+
+/* =========================================================
+   Glassmorphism: cards, faixa de alerta, tooltip, cirurgia robótica
+   ========================================================= */
+@layer components {
+  /* fundo suave para o vidro ter o que desfocar */
+  body { background: #fbfcff; }
+  body::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(42vw 42vw at 8% 18%, rgba(47, 164, 65, 0.07), transparent 70%),
+      radial-gradient(48vw 48vw at 95% 45%, rgba(41, 65, 151, 0.08), transparent 70%),
+      radial-gradient(40vw 40vw at 30% 95%, rgba(41, 65, 151, 0.06), transparent 70%); }
+  .section.alt { background: rgba(240, 244, 251, 0.7); }
+
+  /* --- todos os cards em vidro --- */
+  .card, .quick-card, .service-card, .doctor-card, .article-card, .video-card, .emergency-samu, .wizard, .datepicker, .faq-item, .robotic-benefit, .robotic-step {
+    --glass-bg: rgba(255, 255, 255, 0.62);
+    background: var(--glass-bg);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.75);
+    box-shadow: 0 10px 30px rgba(20, 33, 79, 0.08), 0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 0 0 1px rgba(41, 65, 151, 0.07);
+  }
+  .card.is-blue { --glass-bg: rgba(238, 242, 251, 0.7); }
+  .card.is-green { --glass-bg: rgba(238, 247, 240, 0.7); }
+  .card.is-alert { --glass-bg: rgba(253, 238, 238, 0.72); }
+  .quick-card:hover, .service-card:hover, .doctor-card:hover, .article-card:hover { border-color: rgba(255, 255, 255, 0.95); box-shadow: 0 18px 44px rgba(20, 33, 79, 0.14), 0 1px 0 #fff inset, 0 0 0 1px rgba(41, 65, 151, 0.14); }
+  .emergency-main { box-shadow: 0 20px 50px rgba(20, 33, 79, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.18); }
+
+  /* --- III. tooltip do card de sinais de alerta (não pode ser cortado) --- */
+  .emergency-samu { overflow: visible; border-left: 5px solid var(--alert); z-index: 2; }
+  .emergency-samu::before { display: none; }
+  .emergency-samu .samu-number { top: 0.75rem; right: 1rem; z-index: 0; }
+  .emergency-samu h3 { z-index: 3; }
+  .emergency-samu h3 .tooltip { z-index: 60; }
+  @media (min-width: 641px) { .emergency-samu h3 .tooltip { left: auto; right: -14px; transform: translate(0, 4px); } .emergency-samu h3 .tooltip.is-open { transform: none; } .emergency-samu h3 .tooltip::after { left: auto; right: 20px; transform: none; } }
+
+  /* --- II. faixa vermelha em vidro --- */
+  .footer-band { position: relative; isolation: isolate; overflow: hidden; background: linear-gradient(180deg, transparent 0 50%, var(--brand-navy) 50% 100%); color: #fff; padding: 1rem 0 0.5rem; }
+  .footer-band-glow { position: absolute; inset: 0; z-index: -1; background:
+      radial-gradient(260px 120px at 18% 55%, rgba(255, 80, 88, 0.85), transparent 70%),
+      radial-gradient(320px 140px at 70% 60%, rgba(192, 38, 45, 0.9), transparent 70%),
+      radial-gradient(240px 110px at 92% 40%, rgba(41, 65, 151, 0.8), transparent 70%); filter: blur(8px); }
+  .footer-band-inner { position: relative; padding: 1rem 1.5rem !important; border-radius: 22px; background: linear-gradient(120deg, rgba(156, 28, 34, 0.62), rgba(192, 38, 45, 0.48)); backdrop-filter: blur(20px) saturate(170%); -webkit-backdrop-filter: blur(20px) saturate(170%); border: 1px solid rgba(255, 255, 255, 0.35); box-shadow: 0 16px 40px rgba(120, 10, 20, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.45), inset 0 -1px 0 rgba(0, 0, 0, 0.12); overflow: hidden; flex-wrap: nowrap !important; }
+  @media (max-width: 760px) { .footer-band-inner { flex-wrap: wrap !important; margin-inline: 1rem; } }
+  .footer-band-inner::before { content: ''; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.22) 45%, transparent 60%); transform: translateX(-100%); animation: band-sheen 6s var(--ease) infinite; pointer-events: none; }
+  @keyframes band-sheen { 0%, 55% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+  .footer-band-icon { flex: none; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.35); }
+  .footer-band p { flex: 1; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); }
+
+  /* --- Cirurgia robótica --- */
+  .robotic { position: relative; isolation: isolate; overflow: hidden; padding-block: var(--section); color: #dfe6f7;
+    background: radial-gradient(900px 500px at 85% 10%, rgba(64, 120, 255, 0.35), transparent 60%), radial-gradient(700px 500px at 0% 90%, rgba(47, 164, 65, 0.18), transparent 60%), linear-gradient(160deg, #0b1538 0%, #14214f 45%, #0f1d4d 100%); }
+  .robotic-glow { position: absolute; inset: 0; z-index: -1; pointer-events: none; background-image: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px); background-size: 48px 48px; mask-image: radial-gradient(ellipse at 70% 30%, #000 20%, transparent 70%); -webkit-mask-image: radial-gradient(ellipse at 70% 30%, #000 20%, transparent 70%); }
+  .robotic-crumbs { background: #0b1538; padding-top: 1.25rem; }
+  .robotic-crumbs .breadcrumbs, .robotic-crumbs a, .robotic-crumbs li { color: #b9c5e8 !important; }
+  .robotic-intro { display: grid; gap: clamp(2rem, 1rem + 4vw, 4rem); align-items: center; }
+  @media (min-width: 960px) { .robotic-intro { grid-template-columns: 1.25fr 0.75fr; } }
+  .robotic-title { color: #fff; font-size: clamp(2rem, 1.2rem + 3vw, 3.4rem); line-height: 1.08; letter-spacing: -0.02em; margin: 0.5rem 0 1.25rem; text-wrap: balance; }
+  .robotic-title span { display: block; background: linear-gradient(90deg, #8fe39b, #8fb2ff); -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: 0.08em; }
+  .robotic-lead { font-size: 1.125rem; line-height: 1.7; color: #c9d4f2; max-width: 60ch; }
+  .robotic-lead .tooltip-trigger { margin-left: 0.35rem; background: rgba(255,255,255,0.14); color: #fff; }
+  .robotic-benefits { list-style: none; padding: 0; margin: 2rem 0; display: grid; gap: 0.9rem; }
+  @media (min-width: 640px) { .robotic-benefits { grid-template-columns: 1fr 1fr; } }
+  .robotic .robotic-benefit, .robotic .robotic-step { --glass-bg: rgba(255, 255, 255, 0.07); border-color: rgba(255, 255, 255, 0.16); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.14); border-radius: var(--r-lg); }
+  .robotic-benefit { display: flex; gap: 0.9rem; padding: 1.1rem; transition: transform var(--t-med) var(--ease), background var(--t-fast); }
+  .robotic-benefit:hover { transform: translateY(-3px); --glass-bg: rgba(255, 255, 255, 0.11); }
+  .rb-icon { flex: none; width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg, rgba(47, 164, 65, 0.9), rgba(41, 65, 151, 0.9)); box-shadow: 0 8px 18px rgba(41, 65, 151, 0.45), inset 0 1px 0 rgba(255,255,255,0.35); }
+  .robotic-benefit h3 { color: #fff; font-size: 1rem; margin: 0 0 0.25rem; }
+  .robotic-benefit p { margin: 0; font-size: 0.9rem; color: #b9c5e8; line-height: 1.55; }
+  .robotic-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+  .robotic-video { margin: 0; justify-self: center; width: min(340px, 100%); }
+  .rv-frame { position: relative; aspect-ratio: 9 / 16; border-radius: 32px; overflow: hidden; background: #000; border: 1px solid rgba(255, 255, 255, 0.22); box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5), 0 0 0 8px rgba(255, 255, 255, 0.05), 0 0 80px rgba(80, 130, 255, 0.25); }
+  .rv-frame video { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .rv-play { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 0.75rem; border: 0; padding: 0; cursor: pointer; color: #fff; background: linear-gradient(180deg, rgba(11, 21, 56, 0.05), rgba(11, 21, 56, 0.55)); }
+  .rv-play-btn { width: 76px; height: 76px; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, 0.18); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.5); box-shadow: 0 10px 30px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.5); transition: transform var(--t-med) var(--ease); }
+  .rv-play-btn .icon { margin-left: 4px; }
+  .rv-play:hover .rv-play-btn { transform: scale(1.08); }
+  .rv-play-text { font-weight: 600; font-size: 0.9rem; padding: 0.3rem 0.8rem; border-radius: 999px; background: rgba(11, 21, 56, 0.45); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .robotic-video figcaption { text-align: center; font-size: 0.85rem; color: #9fb0dc; margin-top: 0.9rem; }
+  .robotic-sub { color: #fff; font-size: 1.25rem; margin: 0 0 1.25rem; }
+  .robotic-steps { margin-top: clamp(3rem, 2rem + 3vw, 5rem); }
+  .robotic-steps ol { list-style: none; padding: 0; margin: 0; display: grid; gap: 1rem; counter-reset: none; }
+  @media (min-width: 860px) { .robotic-steps ol { grid-template-columns: repeat(3, 1fr); } }
+  .robotic-step { padding: 1.5rem; position: relative; overflow: hidden; }
+  .rs-n { font-family: var(--font-display); font-weight: 700; font-size: 2.75rem; line-height: 1; background: linear-gradient(135deg, #8fe39b, #8fb2ff); -webkit-background-clip: text; background-clip: text; color: transparent; opacity: 0.9; }
+  .robotic-step h4 { color: #fff; font-size: 1.05rem; margin: 0.75rem 0 0.4rem; }
+  .robotic-step p { margin: 0; color: #b9c5e8; font-size: 0.95rem; line-height: 1.6; }
+  .robotic-mosaic { list-style: none; padding: 0; margin: clamp(2.5rem, 2rem + 2vw, 4rem) 0; display: grid; gap: 0.75rem; grid-template-columns: repeat(2, 1fr); grid-auto-rows: 150px; }
+  @media (min-width: 860px) { .robotic-mosaic { grid-template-columns: repeat(4, 1fr); grid-auto-rows: 190px; } .rm-0 { grid-column: span 2; grid-row: span 2; } .rm-3, .rm-4, .rm-5 { grid-column: span 2; } }
+  @media (max-width: 859px) { .rm-0 { grid-column: span 2; grid-row: span 2; } }
+  .robotic-mosaic li { position: relative; border-radius: var(--r-lg); overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.14); box-shadow: 0 14px 34px rgba(0, 0, 0, 0.3); }
+  .robotic-mosaic img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform var(--t-slow) var(--ease); }
+  .robotic-mosaic li:hover img { transform: scale(1.05); }
+  .rm-cap { position: absolute; left: 0.6rem; bottom: 0.6rem; font-size: 0.78rem; font-weight: 600; color: #fff; padding: 0.3rem 0.7rem; border-radius: 999px; background: rgba(11, 21, 56, 0.45); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.25); }
+  .robotic-bottom { display: grid; gap: 2rem; }
+  @media (min-width: 900px) { .robotic-bottom { grid-template-columns: 1fr 1fr; gap: 3rem; } }
+  .robotic-chips { list-style: none; padding: 0; margin: 0 0 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .robotic-chips li { padding: 0.45rem 0.95rem; border-radius: 999px; font-size: 0.9rem; font-weight: 500; color: #fff; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+  .robotic-note { display: flex; gap: 0.5rem; align-items: flex-start; font-size: 0.9rem; color: #b9c5e8; }
+  .robotic-note .icon { flex: none; margin-top: 2px; color: #8fe39b; }
+  .robotic-link { display: inline-flex; align-items: center; gap: 0.4rem; color: #8fe39b; font-weight: 600; text-decoration: none; margin-top: 0.5rem; }
+  .robotic-link:hover { text-decoration: underline; }
+  .robotic-faq details { border-radius: var(--r-md); background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.14); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); margin-bottom: 0.6rem; }
+  .robotic-faq summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; gap: 1rem; align-items: center; padding: 1rem 1.1rem; font-weight: 600; color: #fff; }
+  .robotic-faq summary::-webkit-details-marker { display: none; }
+  .robotic-faq summary .icon { flex: none; transition: transform var(--t-fast); }
+  .robotic-faq details[open] summary .icon { transform: rotate(45deg); }
+  .robotic-faq details p { margin: 0; padding: 0 1.1rem 1.1rem; color: #c9d4f2; line-height: 1.6; }
+
+  @media (prefers-contrast: more), (forced-colors: active) {
+    .card, .quick-card, .service-card, .doctor-card, .article-card, .video-card, .emergency-samu, .wizard, .datepicker { background: #fff; backdrop-filter: none; -webkit-backdrop-filter: none; border-color: currentColor; }
+    .footer-band-inner { background: var(--alert-700); backdrop-filter: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { .footer-band-inner::before { animation: none; } }
+}
+@layer components {
+  .high-contrast .card, .high-contrast .quick-card, .high-contrast .service-card, .high-contrast .doctor-card, .high-contrast .article-card, .high-contrast .video-card, .high-contrast .emergency-samu, .high-contrast .wizard { background: #fff; backdrop-filter: none; -webkit-backdrop-filter: none; border-color: #000; }
+  .high-contrast .footer-band-inner { background: #7a0d12; backdrop-filter: none; }
+}

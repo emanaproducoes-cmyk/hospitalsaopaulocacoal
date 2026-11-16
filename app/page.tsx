@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { HeroVideo51 } from '@/components/sections/HeroVideo51';
 import { QuickDecision, EmergencyPanel, ServicesGrid, TrustSection, FinalCTA } from '@/components/sections/HomeSections';
 import { UniversalSearch } from '@/components/sections/UniversalSearch';
+import { RoboticSurgery } from '@/components/sections/RoboticSurgery';
 import { DoctorFinder } from '@/components/sections/DoctorFinder';
 import { JourneyTabs } from '@/components/sections/JourneyTabs';
 import { PhotoGallery, VideoCard, MapConsent } from '@/components/sections/MediaSections';
@@ -27,6 +28,8 @@ export default function HomePage() {
       </section>
 
       <ServicesGrid />
+
+      <RoboticSurgery />
 
       <section className="section alt" aria-labelledby="docs-title">
         <div className="container">

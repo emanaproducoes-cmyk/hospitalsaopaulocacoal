@@ -159,6 +159,11 @@ export interface ScheduleRequest {
 }
 
 export type IconName =
+  | 'target'
+  | 'eye'
+  | 'robot'
+  | 'sparkle'
+  | 'recovery'
   | 'emergency'
   | 'calendar'
   | 'microscope'

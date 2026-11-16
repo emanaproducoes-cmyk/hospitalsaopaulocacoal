@@ -8,7 +8,9 @@ export function Footer() {
   return (
     <footer className="site-footer">
       <div className="footer-band">
+        <div className="footer-band-glow" aria-hidden="true" />
         <div className="container footer-band-inner">
+          <span className="footer-band-icon" aria-hidden="true"><Icon name="siren" size={22} /></span>
           <p><strong>Dor no peito, falta de ar, sinais de AVC ou acidente?</strong> Venha imediatamente ao pronto atendimento, aberto todos os dias.</p>
           <Link href="/pronto-atendimento" className="text-link on-dark">Ver orientações <Icon name="arrow-right" size={16} /></Link>
         </div>

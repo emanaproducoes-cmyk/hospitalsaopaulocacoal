@@ -57,6 +57,7 @@ export const nav = [
       { label: 'Pronto atendimento', href: '/pronto-atendimento', desc: 'Quando vir, o que trazer e como chegar' },
       { label: 'Agendar consulta ou exame', href: '/agendar', desc: 'Assistente em 4 passos pelo WhatsApp' },
       { label: 'Centro cirúrgico', href: '/servicos/centro-cirurgico', desc: 'Cirurgias eletivas e de urgência' },
+      { label: 'Cirurgia robótica', href: '/cirurgia-robotica', desc: 'Sistema Toumai: precisão e recuperação' },
       { label: 'Internação', href: '/servicos/internacao', desc: 'Como funciona e o que levar' },
       { label: 'Plantão pediátrico', href: '/servicos/plantao-pediatrico', desc: 'Atendimento para crianças' },
       { label: 'Convênios e particular', href: '/convenios', desc: 'Formas de atendimento' },

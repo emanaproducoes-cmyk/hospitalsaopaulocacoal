@@ -10,7 +10,7 @@ export const dynamic = 'force-static';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
-  const staticRoutes = ['', '/pronto-atendimento', '/agendar', '/especialidades', '/medicos', '/exames', '/pacientes-e-acompanhantes', '/convenios', '/o-hospital', '/conteudo', '/contato', '/ouvidoria', '/trabalhe-conosco', '/perguntas-frequentes', '/privacidade', '/acessibilidade'];
+  const staticRoutes = ['', '/pronto-atendimento', '/agendar', '/cirurgia-robotica', '/especialidades', '/medicos', '/exames', '/pacientes-e-acompanhantes', '/convenios', '/o-hospital', '/conteudo', '/contato', '/ouvidoria', '/trabalhe-conosco', '/perguntas-frequentes', '/privacidade', '/acessibilidade'];
   return [
     ...staticRoutes.map((r) => ({ url: `${site.url}${r}`, lastModified: now, changeFrequency: 'weekly' as const, priority: r === '' ? 1 : r === '/pronto-atendimento' || r === '/agendar' ? 0.9 : 0.7 })),
     ...specialties.map((s) => ({ url: `${site.url}/especialidades/${s.slug}`, lastModified: new Date(s.updatedAt) })),
