@@ -55,7 +55,8 @@ export const nav = [
     href: '/pronto-atendimento',
     children: [
       { label: 'Pronto atendimento', href: '/pronto-atendimento', desc: 'Quando vir, o que trazer e como chegar' },
-      { label: 'Agendar consulta ou exame', href: '/agendar', desc: 'Assistente em 4 passos pelo WhatsApp' },
+      { label: 'Agendar consulta ou exame', href: '/agendar', desc: 'Assistente em 4 passos com calendário' },
+      { label: 'Minha jornada', href: '/minha-jornada', desc: 'Seus pedidos, lembretes e avaliação' },
       { label: 'Centro cirúrgico', href: '/servicos/centro-cirurgico', desc: 'Cirurgias eletivas e de urgência' },
       { label: 'Cirurgia robótica', href: '/cirurgia-robotica', desc: 'Sistema Toumai: precisão e recuperação' },
       { label: 'Internação', href: '/servicos/internacao', desc: 'Como funciona e o que levar' },
@@ -83,6 +84,7 @@ export const footerLinks = {
   atendimento: [
     { label: 'Pronto atendimento', href: '/pronto-atendimento' },
     { label: 'Agendar consulta', href: '/agendar' },
+    { label: 'Minha jornada', href: '/minha-jornada' },
     { label: 'Exames e preparo', href: '/exames' },
     { label: 'Convênios e particular', href: '/convenios' },
     { label: 'Pacientes e acompanhantes', href: '/pacientes-e-acompanhantes' },

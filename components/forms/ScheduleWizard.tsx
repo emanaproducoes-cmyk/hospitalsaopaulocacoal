@@ -13,6 +13,7 @@ import { Icon } from '@/components/ui/Icon';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { DatePicker, formatDateBR } from './DatePicker';
 import type { ScheduleRequest } from '@/lib/domain/types';
+import { downloadIcs, saveRequest, type SavedRequest } from '@/lib/integrations/myRequests';
 
 type Data = {
   type: ScheduleRequest['type'] | '';
@@ -41,7 +42,8 @@ export function ScheduleWizard() {
   const [step, setStep] = useState(0);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<'idle' | 'sending' | 'done'>('idle');
-  const [result, setResult] = useState<{ protocol?: string; wa: string } | null>(null);
+  const [result, setResult] = useState<{ protocol?: string; wa: string; ok: boolean; saved?: SavedRequest } | null>(null);
+  const [kept, setKept] = useState(false);
   const [d, setD] = useState<Data>({ type: '', specialty: '', exam: '', doctor: '', date: '', period: 'qualquer', insurance: 'nao-sei', name: '', phone: '', consent: false, website: '' });
 
   useEffect(() => {
@@ -99,14 +101,6 @@ export function ScheduleWizard() {
     if (!validate(3) || d.website) return;
     setStatus('sending');
     const origin = currentOrigin('agendar');
-    const text = [
-      `Olá! Meu nome é ${d.name.trim()}. Gostaria de agendar ${d.type === 'exame' ? 'um exame' : d.type === 'retorno' ? 'um retorno' : 'uma consulta'}.`,
-      d.type === 'exame' ? `Exame: ${label.exam}` : `Especialidade: ${label.spec}`,
-      label.doctor ? `Profissional de preferência: ${label.doctor}` : '',
-      `Data de preferência: ${label.date} · Período: ${label.period}`,
-      `Atendimento: ${label.ins}`,
-    ].filter(Boolean).join('\n');
-    const wa = whatsappLink({ intent: `Agendar ${d.type}`, origin, text });
     const res = await api.scheduleRequest({
       type: d.type as ScheduleRequest['type'],
       specialty: d.specialty || undefined,
@@ -120,8 +114,30 @@ export function ScheduleWizard() {
       origin,
       consent: { purpose: 'agendamento', granted: true, policyVersion: site.policyVersion, timestamp: new Date().toISOString() },
     });
-    track('click_whatsapp', { origin: 'wizard-submit', intent: d.type });
-    setResult({ protocol: res.ok ? res.protocol : undefined, wa });
+    const text = [
+      `Olá! Meu nome é ${d.name.trim()}. Gostaria de agendar ${d.type === 'exame' ? 'um exame' : d.type === 'retorno' ? 'um retorno' : 'uma consulta'}.`,
+      d.type === 'exame' ? `Exame: ${label.exam}` : `Especialidade: ${label.spec}`,
+      label.doctor ? `Profissional de preferência: ${label.doctor}` : '',
+      `Data de preferência: ${label.date} · Período: ${label.period}`,
+      `Atendimento: ${label.ins}`,
+      res.protocol ? `Protocolo do site: ${res.protocol}` : '',
+    ].filter(Boolean).join('\n');
+    const wa = whatsappLink({ intent: `Agendar ${d.type}`, origin, text });
+    const kind = (d.type || 'consulta') as SavedRequest['kind'];
+    const saved: SavedRequest | undefined = res.protocol
+      ? {
+          protocol: res.protocol,
+          kind,
+          title: `${{ consulta: 'Consulta', exame: 'Exame', retorno: 'Retorno' }[kind]} · ${d.type === 'exame' ? label.exam : label.spec || 'Orientação'}`,
+          slug: d.type === 'exame' ? d.exam : d.specialty,
+          doctor: label.doctor || undefined,
+          date: d.date,
+          period: d.period,
+          createdAt: new Date().toISOString(),
+          sentToCrm: res.ok,
+        }
+      : undefined;
+    setResult({ protocol: res.protocol, wa, ok: res.ok, saved });
     setStatus('done');
   };
 
@@ -130,16 +146,31 @@ export function ScheduleWizard() {
       <div className="wizard wizard-done" role="status">
         <span className="done-icon"><Icon name="check" size={34} /></span>
         <h2>Tudo pronto, {d.name.split(' ')[0]}!</h2>
-        {result.protocol ? (
-          <p>Recebemos sua solicitação (protocolo <strong>{result.protocol}</strong>). A central vai confirmar data e horário pelo telefone informado.</p>
+        {result.ok ? (
+          <p>Recebemos sua solicitação{result.protocol && <> — protocolo <strong>{result.protocol}</strong></>}. A central vai confirmar data e horário pelo telefone informado.</p>
         ) : (
-          <p>Preparamos a mensagem com o que você escolheu. Toque no botão abaixo para enviá-la à central pelo WhatsApp — a equipe confirma data e horário na conversa.</p>
+          <p>Preparamos a mensagem com o que você escolheu{result.protocol && <> e o protocolo <strong>{result.protocol}</strong></>}. Toque no botão abaixo para enviá-la à central pelo WhatsApp: a equipe confirma data e horário na conversa.</p>
         )}
-        <a href={result.wa} target="_blank" rel="noopener noreferrer" className="btn btn-green btn-lg">
-          <Icon name="whatsapp" size={22} /> Enviar pelo WhatsApp
+        <a href={result.wa} target="_blank" rel="noopener noreferrer" className={`btn ${result.ok ? 'btn-secondary' : 'btn-green btn-lg'}`} onClick={() => track('click_whatsapp', { origin: 'wizard-submit', intent: d.type, channel: result.ok ? 'reforco' : 'principal' })}>
+          <Icon name="whatsapp" size={22} /> {result.ok ? 'Falar com a central no WhatsApp' : 'Enviar pelo WhatsApp'}
         </a>
+        {result.saved && (
+          <div className="done-actions">
+            <button type="button" className="btn btn-ghost" onClick={() => { downloadIcs(result.saved!, `${site.address.street}, ${site.address.city}/${site.address.state}`); track('calendar_add', { origin: 'wizard-done' }); }}>
+              <Icon name="calendar" size={18} /> Lembrete na minha agenda
+            </button>
+            {kept ? (
+              <Link href="/minha-jornada" className="btn btn-ghost"><Icon name="check" size={18} /> Guardado · ver Minha jornada</Link>
+            ) : (
+              <button type="button" className="btn btn-ghost" onClick={() => { saveRequest(result.saved!); setKept(true); track('journey_saved', { origin: 'wizard-done' }); }}>
+                <Icon name="file" size={18} /> Acompanhar em Minha jornada
+              </button>
+            )}
+          </div>
+        )}
+        {result.saved && <p className="muted small">“Minha jornada” guarda só o tipo de atendimento, a data e o protocolo, neste aparelho. Você pode apagar quando quiser.</p>}
         <p className="muted">Prefere ligar? <a href={`tel:${site.contacts.scheduling.tel}`}>{site.contacts.scheduling.label}</a></p>
-        <button type="button" className="linklike" onClick={() => { setStatus('idle'); setStep(0); }}>Fazer outro agendamento</button>
+        <button type="button" className="linklike" onClick={() => { setStatus('idle'); setStep(0); setKept(false); }}>Fazer outro agendamento</button>
       </div>
     );
   }

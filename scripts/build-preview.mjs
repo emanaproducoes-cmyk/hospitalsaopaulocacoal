@@ -99,6 +99,9 @@ const define = {
   'process.env.NEXT_PUBLIC_SITE_URL': '""',
   'process.env.NEXT_PUBLIC_API_URL': '""',
   'process.env.NEXT_PUBLIC_SHOW_VALIDATION_FLAGS': '"true"',
+  'process.env.NEXT_PUBLIC_GTM_ID': '""',
+  'process.env.NEXT_PUBLIC_LEADS_ENDPOINT': '""',
+  'process.env.NEXT_PUBLIC_ASSISTANT_ENDPOINT': '""',
 };
 const common = { bundle: true, jsx: 'automatic', alias, define, nodePaths: NODE_PATHS, logLevel: 'warning', loader: { '.css': 'empty' } };
 

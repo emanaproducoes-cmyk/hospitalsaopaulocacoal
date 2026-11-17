@@ -4,6 +4,8 @@
  * - Parâmetros passam por uma lista de permissões: nada de nome, telefone, e-mail ou dado clínico.
  */
 
+import { advanceStage, originTag, type JourneyStage } from './journey';
+
 export type AnalyticsEvent =
   | 'view_service'
   | 'search_doctor'
@@ -14,14 +16,32 @@ export type AnalyticsEvent =
   | 'submit_contact'
   | 'view_location'
   | 'content_engagement'
-  | 'site_search';
+  | 'site_search'
+  | 'page_view'
+  | 'funnel_stage'
+  | 'lead_submitted'
+  | 'assistant_open'
+  | 'assistant_message'
+  | 'assistant_handoff'
+  | 'calendar_add'
+  | 'nps_submitted'
+  | 'journey_saved';
 
 type Params = Record<string, string | number | boolean | undefined>;
 
 const ALLOWED_PARAMS = new Set([
   'origin', 'intent', 'type', 'specialty', 'service_slug', 'exam_slug', 'article_slug', 'action',
   'query_length', 'results_count', 'selected_type', 'form', 'topic', 'depth', 'step',
+  'stage', 'score_band', 'channel', 'nps', 'delivered', 'source', 'medium', 'campaign', 'page_path', 'turn', 'red_flag',
 ]);
+
+/** Evento → etapa da jornada que ele comprova. */
+const STAGE_BY_EVENT: Partial<Record<AnalyticsEvent, JourneyStage>> = {
+  view_service: 'consideracao', search_doctor: 'consideracao', view_exam_prep: 'consideracao', content_engagement: 'consideracao', site_search: 'consideracao', assistant_message: 'consideracao',
+  click_schedule: 'intencao', click_whatsapp: 'intencao', click_emergency: 'intencao', view_location: 'intencao', assistant_handoff: 'intencao',
+  lead_submitted: 'conversao', submit_contact: 'conversao',
+  nps_submitted: 'relacionamento', journey_saved: 'relacionamento', calendar_add: 'relacionamento',
+};
 
 declare global {
   interface Window {
@@ -81,6 +101,8 @@ function sanitize(params: Params): Params {
 
 export function track(event: AnalyticsEvent, params: Params = {}) {
   if (typeof window === 'undefined') return;
+  const stage = STAGE_BY_EVENT[event];
+  if (stage && advanceStage(stage) && event !== 'funnel_stage') track('funnel_stage', { stage, origin: event });
   const consent = readConsent();
   const payload = { event, ...sanitize(params) };
   if (process.env.NODE_ENV !== 'production') console.debug('[analytics]', payload, consent?.analytics ? 'enviado' : 'retido (sem consentimento)');
@@ -89,10 +111,7 @@ export function track(event: AnalyticsEvent, params: Params = {}) {
   window.dataLayer.push(payload);
 }
 
-/** Lê UTMs da URL atual para registrar a origem no contato (sem dados pessoais). */
+/** Origem do contato (página + fonte + campanha), mantida ao longo da navegação. */
 export function currentOrigin(fallback: string): string {
-  if (typeof window === 'undefined') return fallback;
-  const p = new URLSearchParams(window.location.search);
-  const parts = [p.get('origem') || fallback, p.get('utm_source'), p.get('utm_campaign')].filter(Boolean);
-  return parts.join('|');
+  return originTag(fallback);
 }

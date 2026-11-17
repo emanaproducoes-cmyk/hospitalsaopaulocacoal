@@ -208,3 +208,46 @@ export type IconName =
   | 'siren'
   | 'test-tube'
   | 'stethoscope';
+
+/* ---------- Ecossistema: pedidos (leads) enviados ao hub /api/leads ---------- */
+export interface NpsRequest {
+  protocol?: string;
+  score: number; // 0–10
+  comment?: string;
+  consent: ConsentRecord;
+}
+
+export interface AssistantLead {
+  intent: string; // agendar | exame | duvida | convenio …
+  specialty?: string;
+  exam?: string;
+  name: string;
+  phone: string;
+  consent: ConsentRecord;
+}
+
+export type LeadKind = 'agendamento' | 'contato' | 'ouvidoria' | 'nps' | 'assistente';
+
+export interface LeadEnvelope {
+  kind: LeadKind;
+  data: ScheduleRequest | ContactRequest | Feedback | NpsRequest | AssistantLead;
+  journey?: {
+    origin: string;
+    stage: string;
+    firstTouch?: { source: string; medium: string; campaign?: string; content?: string; landing: string; paid?: boolean; at: string };
+    lastTouch?: { source: string; medium: string; campaign?: string; content?: string; landing: string; paid?: boolean; at: string };
+    pagesViewed: number;
+    visits: number;
+    interests: string[];
+  };
+  website?: string; // honeypot
+}
+
+export interface LeadResult {
+  ok: boolean;
+  protocol?: string;
+  delivered?: string[]; // destinos que confirmaram (api-hbsp, crm-webhook)
+  band?: 'quente' | 'morno' | 'frio';
+  fallback?: boolean;
+  error?: string;
+}

@@ -15,7 +15,7 @@ export function ContactForm({ mode = 'contato' }: { mode?: Mode }) {
   const [v, setV] = useState({ name: '', phone: '', email: '', topic: mode === 'ouvidoria' ? 'elogio' : 'duvida', message: '', anonymous: false, consent: false, website: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [state, setState] = useState<'idle' | 'sending' | 'ok' | 'fallback'>('idle');
-  const [protocol, setProtocol] = useState('');
+  const [protocol, setProtocol] = useState<string | undefined>('');
   const set = (k: string, val: string | boolean) => setV((x) => ({ ...x, [k]: val }));
   const anon = mode === 'ouvidoria' && v.anonymous;
 
@@ -39,19 +39,20 @@ export function ContactForm({ mode = 'contato' }: { mode?: Mode }) {
         ? await api.feedback({ type: v.topic as 'elogio', anonymous: v.anonymous, name: anon ? undefined : v.name, contact: anon ? undefined : v.phone || v.email, message: v.message, consent })
         : await api.contactRequest({ name: v.name, phone: v.phone, email: v.email || undefined, topic: v.topic as 'duvida', message: v.message, origin: currentOrigin('contato'), consent });
     track('submit_contact', { form: mode, topic: v.topic });
-    if (res.ok) { setProtocol(res.protocol); setState('ok'); } else setState('fallback');
+    setProtocol(res.protocol);
+    if (res.ok) setState('ok'); else setState('fallback');
   };
 
   if (state === 'ok') {
     return <div className="form-result ok" role="status"><Icon name="check" size={28} /><p><strong>Mensagem recebida.</strong> Protocolo {protocol}. Responderemos em até 2 dias úteis.</p></div>;
   }
   if (state === 'fallback') {
-    const text = `${mode === 'ouvidoria' ? `Ouvidoria (${v.topic})` : `Contato (${v.topic})`}: ${v.message}`;
+    const text = `${mode === 'ouvidoria' ? `Ouvidoria (${v.topic})` : `Contato (${v.topic})`}: ${v.message}${protocol ? `\nProtocolo do site: ${protocol}` : ''}`;
     return (
       <div className="form-result" role="status">
         <Icon name="info" size={28} />
         <div>
-          <p><strong>Quase lá.</strong> O envio direto pelo site ainda está sendo integrado ao sistema do hospital. Envie sua mensagem pelo WhatsApp — o texto já está pronto:</p>
+          <p><strong>Quase lá.</strong> {protocol && <>Seu protocolo é <strong>{protocol}</strong>. </>}Para chegar mais rápido à equipe, envie a mensagem pelo WhatsApp: o texto já está pronto.</p>
           <a className="btn btn-green" href={whatsappLink({ intent: mode, origin: 'form-fallback', text })} target="_blank" rel="noopener noreferrer"><Icon name="whatsapp" size={20} /> Enviar pelo WhatsApp</a>
         </div>
       </div>
