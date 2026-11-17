@@ -133,7 +133,7 @@
   .section { padding-block: var(--section); }
   .section.alt { background: var(--surface-alt); }
   .section.tight { padding-block: calc(var(--section) * 0.6); }
-  .section-head-row { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 1rem 2rem; margin-bottom: 2.25rem; }
+  .section-head-row { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 1rem 2rem; margin-bottom: 2.25rem; }
   .section-head-row .section-heading { margin-bottom: 0; flex: 1 1 520px; }
   .grid-2 { display: grid; gap: 2rem; }
   @media (min-width: 900px) { .grid-2 { grid-template-columns: 1fr 1fr; gap: 3.5rem; } }

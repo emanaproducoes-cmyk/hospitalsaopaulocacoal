@@ -116,11 +116,11 @@ export function SiteHeader() {
               {nav.map((item, i) => (
                 <li
                   key={item.href}
-                  className={'children' in item ? 'has-children' : ''}
-                  onMouseEnter={'children' in item ? () => hoverOpen(i) : undefined}
-                  onMouseLeave={'children' in item ? hoverClose : undefined}
+                  className={item.children ? 'has-children' : ''}
+                  onMouseEnter={item.children ? () => hoverOpen(i) : undefined}
+                  onMouseLeave={item.children ? hoverClose : undefined}
                 >
-                  {'children' in item ? (
+                  {item.children ? (
                     <>
                       <button
                         type="button"
@@ -144,9 +144,9 @@ export function SiteHeader() {
                           ))}
                         </ul>
                         <div className="mega-aside">
-                          <p>{'aside' in item ? item.aside.title : 'Não sabe por onde começar?'}</p>
-                          <Link href={'aside' in item ? item.aside.href : '/agendar'} onClick={() => setOpenMenu(null)} className="text-link">
-                            {'aside' in item ? item.aside.label : 'Fale com a central e nós orientamos'} <Icon name="arrow-right" size={16} />
+                          <p>{item.aside ? item.aside.title : 'Não sabe por onde começar?'}</p>
+                          <Link href={item.aside ? item.aside.href : '/agendar'} onClick={() => setOpenMenu(null)} className="text-link">
+                            {item.aside ? item.aside.label : 'Fale com a central e nós orientamos'} <Icon name="arrow-right" size={16} />
                           </Link>
                         </div>
                       </div>
@@ -194,7 +194,7 @@ export function SiteHeader() {
           <ul className="drawer-nav">
             {nav.map((item) => (
               <li key={item.href}>
-                {'children' in item ? (
+                {item.children ? (
                   <details>
                     <summary>{item.label}</summary>
                     <ul>

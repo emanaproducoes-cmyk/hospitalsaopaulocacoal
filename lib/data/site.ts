@@ -49,7 +49,16 @@ export const site = {
   policyVersion: '2026-11',
 } as const;
 
-export const nav = [
+export interface NavLink { label: string; href: string; desc?: string }
+export interface NavItem {
+  label: string;
+  href: string;
+  /** Com children, vira submenu (abre ao passar o mouse); sem children, é um link simples. */
+  children?: readonly NavLink[];
+  aside?: { title: string; label: string; href: string };
+}
+
+export const nav: readonly NavItem[] = [
   {
     label: 'Atendimento',
     href: '/pronto-atendimento',
@@ -124,7 +133,7 @@ export const nav = [
       { label: 'Doe sangue', href: '/conteudo/doe-sangue', desc: 'Onde e como doar em Cacoal' },
     ],
   },
-] as const;
+];
 
 export const footerLinks = {
   atendimento: [
