@@ -57,6 +57,19 @@ export function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
+  const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const canHover = () => typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  /** Abre o submenu ao passar o mouse (com pequeno atraso para não piscar) e fecha ao sair. */
+  const hoverOpen = (i: number) => {
+    if (!canHover()) return;
+    if (hoverTimer.current) clearTimeout(hoverTimer.current);
+    hoverTimer.current = setTimeout(() => setOpenMenu(i), 90);
+  };
+  const hoverClose = () => {
+    if (!canHover()) return;
+    if (hoverTimer.current) clearTimeout(hoverTimer.current);
+    hoverTimer.current = setTimeout(() => setOpenMenu(null), 220);
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -101,7 +114,12 @@ export function SiteHeader() {
           <nav ref={navRef} className="main-nav" aria-label="Principal">
             <ul>
               {nav.map((item, i) => (
-                <li key={item.href} className={'children' in item ? 'has-children' : ''}>
+                <li
+                  key={item.href}
+                  className={'children' in item ? 'has-children' : ''}
+                  onMouseEnter={'children' in item ? () => hoverOpen(i) : undefined}
+                  onMouseLeave={'children' in item ? hoverClose : undefined}
+                >
                   {'children' in item ? (
                     <>
                       <button
@@ -109,7 +127,7 @@ export function SiteHeader() {
                         className={`nav-link ${isActive(item.href) ? 'is-active' : ''}`}
                         aria-expanded={openMenu === i}
                         aria-controls={`mega-${i}`}
-                        onClick={() => setOpenMenu(openMenu === i ? null : i)}
+                        onClick={() => { if (hoverTimer.current) clearTimeout(hoverTimer.current); setOpenMenu(openMenu === i && !canHover() ? null : i); }}
                       >
                         {item.label}
                         <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5l3-3" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>
