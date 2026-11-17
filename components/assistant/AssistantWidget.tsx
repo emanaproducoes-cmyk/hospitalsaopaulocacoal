@@ -3,21 +3,27 @@
 import Link from 'next/link';
 import { useEffect, useId, useRef, useState } from 'react';
 import { Icon } from '@/components/ui/Icon';
-import { detectRedFlag, emergencyReply, ruleReply, type AssistantAction, type AssistantReply } from '@/lib/assistant/triage';
+import type { AssistantAction, AssistantReply } from '@/lib/assistant/triage';
+import { converse, newContext, LOCAL_FIRST, type ConvContext } from '@/lib/assistant/engine';
 import { track } from '@/lib/integrations/analytics';
 import { api } from '@/lib/integrations/api';
 import { whatsappLink } from '@/lib/integrations/whatsapp';
 import { site } from '@/lib/data/site';
 
-type Msg = { role: 'user' | 'assistant'; content: string; actions?: AssistantAction[]; redFlag?: boolean };
+type Msg = { role: 'user' | 'assistant'; content: string; actions?: AssistantAction[]; redFlag?: boolean; quick?: string[] };
 
 const KEY = 'hbsp-assistant';
 const ENDPOINT = process.env.NEXT_PUBLIC_ASSISTANT_ENDPOINT || '/api/assistant';
-const HELLO: Msg = {
-  role: 'assistant',
-  content: 'Olá! Sou o assistente do Hospital São Paulo. Posso ajudar a agendar, achar um médico ou exame, e tirar dúvidas sobre convênios, visitas e como chegar. Em caso de urgência, venha direto ao pronto atendimento.',
-};
-const CHIPS = ['Quero agendar uma consulta', 'Preciso fazer um exame', 'Vocês aceitam meu convênio?', 'Como chego ao hospital?'];
+function hello(): Msg {
+  const h = new Date().getHours();
+  const g = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+  const lines = [
+    `${g}! Sou o assistente do Hospital São Paulo. Posso ajudar a agendar, achar um médico ou exame, e tirar dúvidas sobre visitas, internação e como chegar. Em urgência, venha direto ao pronto atendimento.`,
+    `${g}! Que bom ter você aqui. Sou o assistente virtual do Hospital São Paulo: me conte do que você precisa, que eu te ajudo a encontrar o caminho.`,
+    `${g}! Há mais de cinco décadas cuidamos de Cacoal, e agora também por aqui. Como posso ajudar você hoje?`,
+  ];
+  return { role: 'assistant', content: lines[Math.floor(Math.random() * lines.length)], quick: ['Quero agendar uma consulta', 'Preciso fazer um exame', 'Conte a história do hospital', 'Como chego ao hospital?'] };
+}
 
 /** Abre o assistente de qualquer lugar: window.dispatchEvent(new CustomEvent('hbsp:assistant', { detail: 'texto' })) */
 export function openAssistant(text?: string) {
@@ -26,7 +32,8 @@ export function openAssistant(text?: string) {
 
 export function AssistantWidget() {
   const [open, setOpen] = useState(false);
-  const [msgs, setMsgs] = useState<Msg[]>([HELLO]);
+  const [msgs, setMsgs] = useState<Msg[]>(() => [hello()]);
+  const ctxRef = useRef<ConvContext>(newContext());
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
   const [lead, setLead] = useState<{ open: boolean; name: string; phone: string; consent: boolean; state: 'idle' | 'sending' | 'done'; protocol?: string; ok?: boolean; error?: string }>({ open: false, name: '', phone: '', consent: false, state: 'idle' });
@@ -38,7 +45,11 @@ export function AssistantWidget() {
   useEffect(() => {
     try {
       const raw = sessionStorage.getItem(KEY);
-      if (raw) setMsgs(JSON.parse(raw));
+      if (raw) {
+        const saved = JSON.parse(raw);
+        if (Array.isArray(saved)) setMsgs(saved);
+        else if (saved && Array.isArray(saved.msgs)) { setMsgs(saved.msgs); if (saved.ctx) ctxRef.current = saved.ctx; }
+      }
     } catch { /* */ }
     const onOpen = (e: Event) => {
       setOpen(true);
@@ -51,7 +62,7 @@ export function AssistantWidget() {
   }, []);
 
   useEffect(() => {
-    try { sessionStorage.setItem(KEY, JSON.stringify(msgs.slice(-20))); } catch { /* */ }
+    try { sessionStorage.setItem(KEY, JSON.stringify({ msgs: msgs.slice(-24), ctx: ctxRef.current })); } catch { /* */ }
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' });
   }, [msgs, lead.open, lead.state]);
 
@@ -70,13 +81,18 @@ export function AssistantWidget() {
     setInput('');
     const history: Msg[] = [...msgs, { role: 'user', content: text }];
     setMsgs(history);
+    setBusy(true);
+    const started = Date.now();
     const turn = history.filter((m) => m.role === 'user').length;
-    let r: AssistantReply;
-    const rf = detectRedFlag(text);
-    if (rf.hit) {
-      r = emergencyReply(rf.reply); // resposta instantânea, sem depender da rede
-    } else {
-      setBusy(true);
+
+    // 1. Repertório local: segurança, atendimento humano, conversa e temas do hospital.
+    const local = converse(text, ctxRef.current);
+    ctxRef.current = local.ctx;
+    let reply: Msg = { role: 'assistant', content: local.reply, actions: local.actions, redFlag: local.redFlag, quick: local.quick };
+    let source = 'repertorio';
+
+    // 2. Perguntas abertas: tenta a IA do servidor; se não houver, fica o repertório.
+    if (!LOCAL_FIRST.includes(local.kind) && local.kind !== 'tema') {
       try {
         const ctrl = new AbortController();
         const t = setTimeout(() => ctrl.abort(), 14000);
@@ -87,16 +103,24 @@ export function AssistantWidget() {
           signal: ctrl.signal,
         });
         clearTimeout(t);
-        r = res.ok && (res.headers.get('content-type') || '').includes('json') ? ((await res.json()) as AssistantReply) : ruleReply(text);
-      } catch {
-        r = ruleReply(text);
-      } finally {
-        setBusy(false);
-      }
+        if (res.ok && (res.headers.get('content-type') || '').includes('json')) {
+          const r = (await res.json()) as AssistantReply;
+          if (r.source === 'ia' || r.redFlag) {
+            reply = { role: 'assistant', content: r.reply, actions: r.actions, redFlag: r.redFlag, quick: r.redFlag ? [] : local.quick };
+            source = 'ia';
+          }
+        }
+      } catch { /* segue com o repertório */ }
     }
-    track('assistant_message', { turn, red_flag: !!r.redFlag, intent: r.intent, channel: r.source });
-    if (r.redFlag) track('click_emergency', { origin: 'assistente', action: 'orientacao' });
-    setMsgs((m) => [...m, { role: 'assistant', content: r.reply, actions: r.actions, redFlag: r.redFlag }]);
+
+    // 3. "Digitando…" com tempo natural, proporcional ao tamanho da resposta.
+    const wait = Math.max(0, local.typingMs - (Date.now() - started));
+    await new Promise((r) => setTimeout(r, wait));
+    setBusy(false);
+    track('assistant_message', { turn, red_flag: !!reply.redFlag, intent: local.topic || local.kind, channel: source });
+    if (reply.redFlag) track('click_emergency', { origin: 'assistente', action: 'orientacao' });
+    if (local.kind === 'humano') track('assistant_handoff', { action: 'sugerido', origin: local.topic });
+    setMsgs((m) => [...m, reply]);
   }
 
   const onAction = (a: AssistantAction) => {
@@ -156,13 +180,21 @@ export function AssistantWidget() {
                 )}
               </div>
             ))}
-            {busy && <div className="as-msg is-assistant as-typing" aria-label="O assistente está escrevendo"><span /><span /><span /></div>}
-
-            {msgs.length === 1 && !busy && (
-              <div className="as-chips">
-                {CHIPS.map((c) => <button key={c} type="button" onClick={() => send(c)}>{c}</button>)}
+            {busy && (
+              <div className="as-typing-row" role="status">
+                <span className="as-typing" aria-hidden="true"><span /><span /><span /></span>
+                <span className="as-typing-label">Assistente HBSP está digitando…</span>
               </div>
             )}
+
+            {!busy && !lead.open && (() => {
+              const last = msgs[msgs.length - 1];
+              return last && last.role === 'assistant' && last.quick && last.quick.length > 0 ? (
+                <div className="as-chips" aria-label="Sugestões">
+                  {last.quick.map((c) => <button key={c} type="button" onClick={() => send(c)}>{c}</button>)}
+                </div>
+              ) : null;
+            })()}
 
             {lead.open && (
               <div className="as-lead">

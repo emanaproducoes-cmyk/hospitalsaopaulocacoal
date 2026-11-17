@@ -74,10 +74,56 @@ export const nav = [
       { label: 'Saúde da criança', href: '/especialidades/pediatria', desc: 'Pediatria e subespecialidades' },
     ],
   },
-  { label: 'Exames', href: '/exames' },
-  { label: 'Pacientes e acompanhantes', href: '/pacientes-e-acompanhantes' },
-  { label: 'O hospital', href: '/o-hospital' },
-  { label: 'Conteúdo', href: '/conteudo' },
+  {
+    label: 'Exames',
+    href: '/exames',
+    aside: { title: 'Dúvida sobre o preparo?', label: 'O assistente explica e agenda com você', href: '/exames' },
+    children: [
+      { label: 'Todos os exames', href: '/exames', desc: 'Preparo, documentos e agendamento' },
+      { label: 'Tomografia computadorizada', href: '/exames/tomografia-computadorizada', desc: 'Imagens detalhadas em poucos minutos' },
+      { label: 'Raio X', href: '/exames/radiografia', desc: 'Rápido e indolor' },
+      { label: 'Endoscopia digestiva', href: '/exames/endoscopia-digestiva', desc: 'Esôfago, estômago e duodeno' },
+      { label: 'Exames laboratoriais', href: '/exames/exames-laboratoriais', desc: 'Sangue, urina e outros' },
+      { label: 'Ecocardiograma', href: '/exames/ecocardiograma', desc: 'Ultrassom do coração' },
+    ],
+  },
+  {
+    label: 'Pacientes e acompanhantes',
+    href: '/pacientes-e-acompanhantes',
+    aside: { title: 'Já agendou?', label: 'Acompanhe tudo em Minha jornada', href: '/minha-jornada' },
+    children: [
+      { label: 'Guia do paciente', href: '/pacientes-e-acompanhantes', desc: 'Documentos, internação, alta e retorno' },
+      { label: 'Visitas e acompanhantes', href: '/pacientes-e-acompanhantes#documentos', desc: 'Direitos e orientações' },
+      { label: 'Minha jornada', href: '/minha-jornada', desc: 'Pedidos, lembretes e preparo' },
+      { label: 'Avaliar atendimento', href: '/avaliar', desc: 'Conte como foi, em 1 minuto' },
+      { label: 'Perguntas frequentes', href: '/perguntas-frequentes', desc: 'Respostas rápidas' },
+      { label: 'Ouvidoria', href: '/ouvidoria', desc: 'Elogios, sugestões e reclamações' },
+    ],
+  },
+  {
+    label: 'O hospital',
+    href: '/o-hospital',
+    aside: { title: '51 anos de história', label: 'Conheça quem cuida de Cacoal desde 1975', href: '/o-hospital' },
+    children: [
+      { label: 'Nossa história', href: '/o-hospital', desc: 'De 8 leitos em 1975 à referência regional' },
+      { label: 'Cirurgia robótica', href: '/cirurgia-robotica', desc: 'Tecnologia a serviço do cuidado' },
+      { label: 'Trabalhe conosco', href: '/trabalhe-conosco', desc: 'Faça parte da equipe' },
+      { label: 'Contato e localização', href: '/contato', desc: 'Endereço, telefones e mapa' },
+      { label: 'Privacidade (LGPD)', href: '/privacidade', desc: 'Como cuidamos dos seus dados' },
+    ],
+  },
+  {
+    label: 'Conteúdo',
+    href: '/conteudo',
+    aside: { title: 'Informação que cuida', label: 'Ver todos os conteúdos de saúde', href: '/conteudo' },
+    children: [
+      { label: 'Todos os conteúdos', href: '/conteudo', desc: 'Saúde em linguagem simples' },
+      { label: 'Novembro Azul', href: '/conteudo/novembro-azul', desc: 'A saúde do homem' },
+      { label: 'Outubro Rosa', href: '/conteudo/outubro-rosa', desc: 'Prevenção do câncer de mama' },
+      { label: 'Parto humanizado', href: '/conteudo/parto-humanizado', desc: 'Como planejar o seu parto' },
+      { label: 'Doe sangue', href: '/conteudo/doe-sangue', desc: 'Onde e como doar em Cacoal' },
+    ],
+  },
 ] as const;
 
 export const footerLinks = {

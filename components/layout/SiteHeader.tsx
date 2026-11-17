@@ -144,9 +144,9 @@ export function SiteHeader() {
                           ))}
                         </ul>
                         <div className="mega-aside">
-                          <p>Não sabe por onde começar?</p>
-                          <Link href="/agendar" onClick={() => setOpenMenu(null)} className="text-link">
-                            Fale com a central e nós orientamos <Icon name="arrow-right" size={16} />
+                          <p>{'aside' in item ? item.aside.title : 'Não sabe por onde começar?'}</p>
+                          <Link href={'aside' in item ? item.aside.href : '/agendar'} onClick={() => setOpenMenu(null)} className="text-link">
+                            {'aside' in item ? item.aside.label : 'Fale com a central e nós orientamos'} <Icon name="arrow-right" size={16} />
                           </Link>
                         </div>
                       </div>

@@ -3,6 +3,8 @@ import { exams } from '@/lib/data/exams';
 import { doctors } from '@/lib/data/doctors';
 import { site } from '@/lib/data/site';
 import { actionFor, detectIntent, detectRedFlag, emergencyReply, redact, ruleReply, type AssistantAction, type AssistantReply } from '@/lib/assistant/triage';
+import { HUMAN_TOPICS } from '@/lib/assistant/knowledge';
+import { normalize } from '@/lib/data/search-index';
 
 /**
  * Assistente HBSP no servidor.
@@ -23,6 +25,9 @@ function systemPrompt(): string {
   const docs = doctors.map((d) => `${d.slug}=${`${d.title} ${d.name}`.trim()} (${d.specialtyLabel})`).join('; ');
   return [
     `Você é o Assistente HBSP, do ${site.name} (Cacoal/RO, ${new Date().getFullYear() - site.foundedYear} anos). Fala português do Brasil, com acolhimento, frases curtas e no máximo 90 palavras.`,
+    'Tom: caloroso, humano e respeitoso, como uma recepcionista experiente que gosta de gente. Reconheça a emoção da pessoa quando houver (preocupação, pressa, cuidado com um familiar). Varie as palavras e a estrutura a cada resposta: nunca repita a mesma frase de abertura na conversa.',
+    `História (use só estes fatos): fundado em ${site.foundedYear} pelo ${site.founder}, com 8 leitos, 5 consultórios e 3 médicos; em 1983, primeira ampliação (15 leitos, centro cirúrgico reestruturado, UTI com 3 leitos, laboratório, raio X e endoscopia); em 1996, gestão colegiada de nove médicos e um bioquímico; em 2026, nova identidade e ecossistema digital. Tem cirurgia robótica (sistema Toumai). O pronto atendimento funciona todos os dias, com classificação de risco.`,
+    'ATENDIMENTO HUMANO OBRIGATÓRIO: preços e orçamentos, formas de pagamento e parcelamento, tempo de recuperação e repouso, cobertura e autorização de convênio, resultados e laudos, diagnósticos, remédios e doses, reclamações graves e luto. Nesses casos não responda o conteúdo: acolha, explique em uma frase que depende do caso e ofereça as ações whatsapp e chamar.',
     'Seu papel: orientar e encaminhar. Ajude a agendar consulta ou exame, achar médico e especialidade, explicar convênios, visitas, internação, localização e o que fazer em seguida.',
     'Regras inegociáveis:',
     '- Nunca faça diagnóstico, não diga qual doença a pessoa tem, não indique remédio, dose nem tratamento. Diga que quem avalia é o médico.',
@@ -52,6 +57,16 @@ export async function answer(messages: ChatMessage[]): Promise<AssistantReply> {
   const last = [...messages].reverse().find((m) => m.role === 'user')?.content || '';
   const rf = detectRedFlag(last);
   if (rf.hit) return emergencyReply(rf.reply);
+  const norm = normalize(last);
+  const human = HUMAN_TOPICS.find((h) => h.match.test(norm));
+  if (human) {
+    return {
+      reply: human.replies[Math.floor(Math.random() * human.replies.length)],
+      actions: [actionFor('whatsapp'), actionFor('chamar')].filter(Boolean) as AssistantAction[],
+      intent: 'duvida',
+      source: 'regras',
+    };
+  }
 
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) return ruleReply(last);
