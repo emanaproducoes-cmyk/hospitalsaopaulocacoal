@@ -28,7 +28,7 @@ interface Chart {
   grant: { status: string; expiraEm: string | null } | null;
 }
 interface Painel { medico: { nome: string; crm: string; rqe: string | null; especialidade: string }; recentes: { number: string; nome: string; em: string }[]; notifications: { id: string; titulo: string; texto: string; lida: boolean; em: string }[] }
-type CTab = 'resumo' | 'cadastro' | 'anamnese' | 'evolucao' | 'atendimentos' | 'exames' | 'documentos' | 'acessos';
+type CTab = 'resumo' | 'cadastro' | `anam-${string}` | 'evolucao' | 'atendimentos' | 'exames' | 'documentos' | 'acessos';
 type View = 'buscar' | 'novo';
 const SEXOS = ['Feminino', 'Masculino', 'Intersexo', 'Prefiro não informar'];
 const maskCpf = (v: string) => v.replace(/\D/g, '').slice(0, 11).replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})$/, '$1-$2');
@@ -46,7 +46,6 @@ export function DoctorApp() {
   const [chart, setChart] = useState<Chart | null>(null);
   const [ctab, setCtab] = useState<CTab>('resumo');
   const [anam, setAnam] = useState<FormValue>({});
-  const [section, setSection] = useState(ANAMNESIS[0].key);
   const [enc, setEnc] = useState<FormValue | null>(null);
   const [dirty, setDirty] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -94,14 +93,14 @@ export function DoctorApp() {
   const ctabs: { key: CTab; label: string; icon: IconName; badge?: number }[] = chart ? [
     { key: 'resumo', label: 'Resumo', icon: 'heart' },
     { key: 'cadastro', label: 'Dados pessoais', icon: 'user' },
-    { key: 'anamnese', label: 'Saúde e anamnese', icon: 'edit' },
+    ...ANAMNESIS.map((s) => ({ key: `anam-${s.key}` as CTab, label: s.title, icon: s.icon as IconName })),
     { key: 'evolucao', label: 'Evolução e prescrições', icon: 'pill' },
     { key: 'atendimentos', label: 'Atendimentos', icon: 'stethoscope', badge: chart.encounters.length },
     { key: 'exames', label: 'Exames e laudos', icon: 'scan', badge: chart.files.length },
     { key: 'documentos', label: 'Docs do paciente', icon: chart.patientFiles ? 'key' : 'lock', badge: chart.patientFilesCount },
     { key: 'acessos', label: 'Quem acessou', icon: 'history' },
   ] : [];
-  const setTab = (k: CTab) => { if (dirty && !window.confirm('Há alterações não salvas. Continuar?')) return; setDirty(false); if (chart) { setAnam(chart.anamnesis); setProf(chart.profile); } setCtab(k); };
+  const setTab = (k: CTab) => { if (ctab.startsWith('anam-') && k.startsWith('anam-')) { setCtab(k); return; } if (dirty && !window.confirm('Há alterações não salvas. Continuar?')) return; setDirty(false); if (chart) { setAnam(chart.anamnesis); setProf(chart.profile); } setCtab(k); };
   const vitals = chart ? chart.encounters.filter((e) => Object.values(g(e.data, 'vitais')).some((x) => x !== '' && x !== undefined)) : [];
   const prescs = chart ? chart.encounters.flatMap((e) => (Array.isArray(e.data.prescricao) ? (e.data.prescricao as Record<string, unknown>[]) : []).filter((x) => x.medicamento).map((x) => ({ ...x, em: e.criadoEm, medico: e.medico }) as Record<string, unknown> & { em: string; medico: string })) : [];
   const dx = chart ? chart.encounters.map((e) => ({ ...g(e.data, 'avaliacao'), em: e.criadoEm, medico: e.medico }) as Record<string, unknown> & { em: string; medico: string }).filter((x) => x.hipoteses || x.cid) : [];
@@ -241,15 +240,12 @@ export function DoctorApp() {
               </div>
             )}
 
-            {ctab === 'anamnese' && (
+            {ctab.startsWith('anam-') && (
               <>
-                <div className="sx-seg" role="tablist" aria-label="Partes da anamnese">
-                  {ANAMNESIS.map((s) => <button key={s.key} type="button" role="tab" aria-selected={section === s.key} className={section === s.key ? 'is-on' : ''} onClick={() => setSection(s.key)}>{s.title}</button>)}
-                </div>
-                <FormRenderer schema={ANAMNESIS} only={section} value={anam} role="medico" onChange={(v) => { setAnam(v); setDirty(true); }} />
+                <FormRenderer schema={ANAMNESIS} only={ctab.slice(5)} value={anam} role="medico" onChange={(v) => { setAnam(v); setDirty(true); }} />
                 <div className="sx-savebar">
                   <span>{dirty ? 'Alterações não salvas' : `Versão ${chart.anamnesisVersion} · ${chart.anamnesisHistory} versões anteriores preservadas`}</span>
-                  <button type="button" className="sx-btn is-primary" disabled={!dirty || busy} onClick={async () => { setBusy(true); try { await sx(`medico/prontuario/${chart.number}/anamnese`, { method: 'PUT', json: { value: anam, version: chart.anamnesisVersion } }); setToast({ kind: 'ok', text: 'Anamnese atualizada.' }); await reload(); } catch (e) { fail(e); } finally { setBusy(false); } }}><Icon name="save" size={16} /> Salvar anamnese</button>
+                  <button type="button" className="sx-btn is-primary" disabled={!dirty || busy} onClick={async () => { setBusy(true); try { await sx(`medico/prontuario/${chart.number}/anamnese`, { method: 'PUT', json: { value: anam, version: chart.anamnesisVersion } }); setToast({ kind: 'ok', text: 'Informações de saúde salvas no prontuário.' }); await reload(); } catch (e) { fail(e); } finally { setBusy(false); } }}><Icon name="save" size={16} /> Salvar</button>
                 </div>
               </>
             )}
