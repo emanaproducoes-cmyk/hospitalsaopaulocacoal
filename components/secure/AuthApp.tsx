@@ -78,7 +78,13 @@ function CodeInput({ onComplete, disabled }: { onComplete: (c: string) => void; 
   );
 }
 
-function DemoBox({ refreshKey }: { refreshKey: number }) {
+const DEMO_ACCOUNTS: { area: Area; label: string; email: string }[] = [
+  { area: 'paciente', label: 'Paciente', email: 'maria.ficticia@demo.hbsp' },
+  { area: 'medico', label: 'Médica', email: 'dra.beatriz@demo.hbsp' },
+  { area: 'medico', label: 'Administração', email: 'admin@demo.hbsp' },
+];
+
+function DemoBox({ refreshKey, onPick }: { refreshKey: number; onPick: (area: Area, email: string) => void }) {
   const [items, setItems] = useState<{ para: string; assunto: string; codigo: string | null; link: string | null; em: string }[]>([]);
   useEffect(() => {
     let alive = true;
@@ -92,9 +98,9 @@ function DemoBox({ refreshKey }: { refreshKey: number }) {
       <p className="ax-demo-title"><Icon name="info" size={16} /> Modo demonstração · dados fictícios</p>
       <p>Senha de todas as contas de teste: <code>Hbsp-Demo-2026</code></p>
       <ul className="ax-demo-accounts">
-        <li><strong>Paciente:</strong> maria.ficticia@demo.hbsp</li>
-        <li><strong>Médica:</strong> dra.beatriz@demo.hbsp</li>
-        <li><strong>Administração:</strong> admin@demo.hbsp (área do médico)</li>
+        {DEMO_ACCOUNTS.map((a) => (
+          <li key={a.email}><button type="button" className="ax-demo-pick" onClick={() => onPick(a.area, a.email)}><strong>{a.label}:</strong> {a.email} <span>usar</span></button></li>
+        ))}
       </ul>
       <p className="ax-demo-title"><Icon name="mail" size={16} /> Caixa de e-mails de teste</p>
       {items.length === 0 ? <p className="ax-demo-empty">Os códigos enviados aparecem aqui.</p> : (
@@ -182,13 +188,19 @@ export function AuthApp() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img className="ax-logo" src={asset('/brand/logo-hbsp-white.png')} alt="" />
           <p className="ax-kicker">Ambiente seguro HBSP</p>
-          <h2>Seu cuidado,<br />protegido em cada clique.</h2>
+          <h2>Cuidado de perto,<br />há 51 anos.</h2>
           <ul>
-            <li><Icon name="fingerprint" size={20} /> Verificação em duas etapas em todo acesso</li>
-            <li><Icon name="lock" size={20} /> Dados e arquivos criptografados (AES-256)</li>
-            <li><Icon name="key" size={20} /> Você decide quem vê seus documentos</li>
-            <li><Icon name="history" size={20} /> Registro de cada acesso ao prontuário</li>
+            <li><Icon name="heart" size={20} /> Cuidando de Cacoal e região desde 1975</li>
+            <li><Icon name="stethoscope" size={20} /> 30 especialidades em um só lugar</li>
+            <li><Icon name="emergency" size={20} /> Pronto atendimento, centro cirúrgico e internação</li>
+            <li><Icon name="baby" size={20} /> Maternidade, diagnóstico e exames</li>
           </ul>
+        </div>
+        <div className="ax-visual-foot">
+          <span><Icon name="fingerprint" size={15} /> Verificação em duas etapas em todo acesso</span>
+          <span><Icon name="lock" size={15} /> Dados e arquivos criptografados (AES-256)</span>
+          <span><Icon name="key" size={15} /> Você decide quem vê seus documentos</span>
+          <span><Icon name="history" size={15} /> Registro de cada acesso ao prontuário</span>
         </div>
       </div>
 
@@ -296,7 +308,7 @@ export function AuthApp() {
 
           <SecureBadge />
         </div>
-        {demo && <DemoBox refreshKey={tick} />}
+        {demo && <DemoBox refreshKey={tick} onPick={(a, e) => { setArea(a); setEmail(e); setPw('Hbsp-Demo-2026'); setErr(''); setStep('entrar'); }} />}
       </main>
     </div>
   );

@@ -153,7 +153,7 @@ on('POST', 'auth/login', async (req) => {
   const allowed = area === 'medico' ? ['medico', 'admin'] : ['paciente'];
   if (!allowed.includes(user.role)) {
     await securityEvent('area-errada', 'media', { userId: user.id, ipHash: ipHash(req), detail: `conta ${user.role} tentou entrar na área ${area}` });
-    return fail(403, area === 'medico' ? 'Esta conta não tem acesso à área do médico.' : 'Use a área do médico para esta conta.');
+    return fail(403, area === 'medico' ? 'Este e-mail está cadastrado como paciente. Entre pela aba “Sou paciente”. O acesso médico é criado pela administração do hospital.' : 'Esta conta é da equipe médica. Entre pela aba “Sou médico”.');
   }
   if (user.status === 'bloqueado') return fail(423, 'Conta suspensa. Fale com a central.');
   await db.update('users', { id: user.id }, { failed_attempts: 0, locked_until: null });
