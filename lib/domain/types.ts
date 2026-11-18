@@ -159,6 +159,21 @@ export interface ScheduleRequest {
 }
 
 export type IconName =
+  | 'user'
+  | 'lock'
+  | 'key'
+  | 'upload'
+  | 'download'
+  | 'bell'
+  | 'logout'
+  | 'pill'
+  | 'alert'
+  | 'history'
+  | 'fingerprint'
+  | 'globe'
+  | 'trash'
+  | 'edit'
+  | 'save'
   | 'target'
   | 'eye'
   | 'robot'

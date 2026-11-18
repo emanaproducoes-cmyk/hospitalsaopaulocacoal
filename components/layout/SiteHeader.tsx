@@ -42,6 +42,8 @@ export function TopBar() {
           <a href={`tel:${site.contacts.scheduling.tel}`} onClick={() => track('click_emergency', { origin: 'topbar', action: 'call' })}>
             <Icon name="phone" size={15} /> {site.contacts.scheduling.label}
           </a>
+          <Link href="/acesso?area=paciente" className="topbar-portal"><Icon name="user" size={15} /> Área do paciente</Link>
+          <Link href="/acesso?area=medico" className="topbar-portal is-doctor"><Icon name="stethoscope" size={15} /> Área do médico</Link>
           <Link href="/acessibilidade" className="topbar-link">Acessibilidade</Link>
           <A11yControls />
         </div>
@@ -186,6 +188,10 @@ export function SiteHeader() {
           <button type="button" className="icon-btn" onClick={() => setDrawer(false)} aria-label="Fechar menu">
             <Icon name="close" size={24} />
           </button>
+        </div>
+        <div className="drawer-portals">
+          <Link href="/acesso?area=paciente" className="drawer-portal" onClick={() => setDrawer(false)}><Icon name="user" size={20} /> Área do paciente</Link>
+          <Link href="/acesso?area=medico" className="drawer-portal is-doctor" onClick={() => setDrawer(false)}><Icon name="stethoscope" size={20} /> Área do médico</Link>
         </div>
         <Link href="/pronto-atendimento" className="drawer-emergency" onClick={() => { setDrawer(false); track('click_emergency', { origin: 'drawer' }); }}>
           <Icon name="siren" size={22} /> Estou com uma urgência

@@ -19,7 +19,19 @@ const nextConfig = {
   },
   async headers() {
     if (isStaticExport) return [];
-    return [{ source: '/:path*', headers: securityHeaders }];
+    const secureArea = [
+      ...securityHeaders.filter((h) => h.key !== 'X-Frame-Options'),
+      { key: 'X-Frame-Options', value: 'DENY' },
+      { key: 'Cache-Control', value: 'no-store, max-age=0' },
+      { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
+      { key: 'Referrer-Policy', value: 'no-referrer' },
+      { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+    ];
+    return [
+      { source: '/:path*', headers: securityHeaders },
+      { source: '/(acesso|area-do-paciente|area-do-medico|admin)/:path*', headers: secureArea },
+      { source: '/(acesso|area-do-paciente|area-do-medico|admin)', headers: secureArea },
+    ];
   },
 };
 
