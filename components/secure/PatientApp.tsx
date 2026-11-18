@@ -6,7 +6,8 @@ import { asset } from '@/lib/asset';
 import { ANAMNESIS, PROFILE, ENCOUNTER, type FormValue } from '@/lib/clinical/schema';
 import { age, fmtDate, fmtDateTime, fmtSize, SessionError, sx } from './client';
 import { FormRenderer } from './FormRenderer';
-import { Empty, IdleWatch, Panel, Pill, SecureBadge, Spinner, Tabs, Toast, type ToastT } from './SecureUI';
+import { Empty, IdleWatch, LegalNote, Panel, Pill, Spinner, Tabs, Toast, type ToastT } from './SecureUI';
+import { MyPhoto } from './ProfilePhoto';
 import type { IconName } from '@/lib/domain/types';
 
 type Tab = 'inicio' | 'dados' | 'saude' | 'atendimentos' | 'arquivos' | 'permissoes' | 'avisos' | 'acessos';
@@ -181,10 +182,13 @@ export function PatientApp() {
     <div className="sx-app is-patient">
       <IdleWatch minutes={30} onExpire={logout} />
       <aside className="sx-side">
-        <a href="/" className="sx-brand">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={asset('/brand/logo-hbsp-white.png')} alt="Hospital São Paulo" />
-        </a>
+        <div className="sx-brandrow">
+          <a href="/" className="sx-brand">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={asset('/brand/logo-hbsp-white.png')} alt="Hospital São Paulo" />
+          </a>
+          <MyPhoto name={name} onMessage={(kind, text) => setToast({ kind, text })} />
+        </div>
         <div className="sx-id">
           <p className="sx-id-label">Nº do paciente</p>
           <p className="sx-id-number">{data.number}</p>
@@ -200,7 +204,6 @@ export function PatientApp() {
             <p className="sx-kicker">Área do paciente</p>
             <h1>{tabs.find((t) => t.key === tab)!.label}</h1>
           </div>
-          <SecureBadge compact />
         </header>
 
         {tab === 'inicio' && (
@@ -329,6 +332,7 @@ export function PatientApp() {
             ) : <Empty icon="history">Nenhum acesso registrado.</Empty>}
           </Panel>
         )}
+        <LegalNote />
         <Toast toast={toast} onDone={() => setToast(null)} />
       </main>
     </div>

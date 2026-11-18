@@ -24,6 +24,7 @@ export interface UserRow {
   last_login_at: string | null;
   pending_enc: string | null; // dados do cadastro aguardando confirmação do e-mail (criptografados)
   created_at: string;
+  avatar_path?: string | null;
 }
 
 export interface PatientRow {

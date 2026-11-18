@@ -24,8 +24,10 @@ create table if not exists users (
   locked_until timestamptz,
   last_login_at timestamptz,
   pending_enc text,
+  avatar_path text,                  -- foto de perfil, criptografada no bucket privado
   created_at timestamptz not null default now()
 );
+alter table users add column if not exists avatar_path text;
 
 create table if not exists patients (
   id uuid primary key,

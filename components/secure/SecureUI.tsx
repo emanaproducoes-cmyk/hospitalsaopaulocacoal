@@ -5,6 +5,12 @@ import { Icon } from '@/components/ui/Icon';
 import type { IconName } from '@/lib/domain/types';
 
 /** Selo de ambiente seguro, mostrado em todas as telas do ambiente. */
+/** Nota legal de rodapé: texto corrido, sem ícones, com fio dourado acima. */
+export const LEGAL_TEXT = 'Ambiente restrito e monitorado. As informações deste ambiente são dados pessoais sensíveis de saúde, protegidos pela Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018, arts. 11 e 46), pelo sigilo profissional e pelas normas do Conselho Federal de Medicina, e só podem ser acessadas pelo próprio titular ou por profissional autorizado, com verificação em duas etapas, criptografia de dados e registro de cada acesso. Invadir dispositivo ou sistema informático para obter, adulterar ou destruir dados sem autorização é crime previsto no art. 154-A do Código Penal (Lei nº 12.737/2012, com a redação da Lei nº 14.155/2021), punido com reclusão de 1 a 4 anos e multa, pena aumentada de um terço a dois terços se houver prejuízo econômico e de 2 a 5 anos se forem obtidas informações sigilosas. Revelar sem justa causa segredo conhecido em razão da profissão também é crime (art. 154 do Código Penal). Tentativas de acesso indevido são registradas com data, hora e origem e podem ser comunicadas às autoridades competentes. Ao prosseguir, você declara ser o titular da conta ou profissional autorizado pelo Hospital São Paulo.';
+export function LegalNote({ className = '' }: { className?: string }) {
+  return <p className={`sx-legal ${className}`}>{LEGAL_TEXT}</p>;
+}
+
 export function SecureBadge({ compact = false }: { compact?: boolean }) {
   return (
     <p className={`sx-badge ${compact ? 'is-compact' : ''}`}>

@@ -3,7 +3,7 @@ import { blindIndex, decrypt, decryptJson, encryptJson, hashPassword, newToken, 
 import { cfg, DEMO, LIMITS } from './config';
 import { audit, securityEvent, tooMany, verifyAuditChain } from './security';
 import { COOKIE, cookieHeader, createSession, endSession, getAuth, ipHash, readCookie, upgradeSession, type Auth } from './session';
-import { checkOtp, createPatient, createUser, doctorLabel, fileName, findUserByEmail, issueOtp, maskEmail, notify, patientName, readFile, saveAnamnesis, saveProfile, storeFile, UserError, viewPatient } from './services';
+import { checkOtp, createPatient, createUser, doctorLabel, fileName, findUserByEmail, issueOtp, maskEmail, notify, patientName, readAvatar, readFile, saveAnamnesis, saveProfile, storeAvatar, storeFile, UserError, viewPatient } from './services';
 import { googleCallback, googleStart, OAUTH_COOKIE } from './google';
 import { outbox, sendMail } from './mail';
 import { ensureSeed } from './seed';
@@ -95,6 +95,8 @@ function encounterView(e: { id: string; kind: string; data_enc: string; created_
   if (forPatient) for (const g of Object.values(data)) if (g && !Array.isArray(g)) for (const k of PRIVATE_ENCOUNTER_KEYS) delete (g as Record<string, unknown>)[k];
   return { id: e.id, tipo: e.kind, data, medico: names.get(e.doctor_id) || 'Equipe médica', criadoEm: e.created_at };
 }
+
+const ACCESS_LABELS: Record<string, string> = { 'prontuario-aberto': 'Abriu seu prontuário', 'anamnese-atualizada': 'Atualizou a anamnese', 'consulta-registrada': 'Registrou um atendimento', 'arquivo-anexado': 'Anexou um arquivo', 'arquivo-baixado': 'Abriu um arquivo', 'cadastro-atualizado': 'Atualizou o cadastro', 'permissao-solicitada': 'Pediu acesso aos seus documentos', 'permissao-concedido': 'Você autorizou acesso', 'permissao-negado': 'Você negou acesso', 'permissao-revogado': 'Você revogou acesso', 'paciente-criado': 'Cadastro criado', 'arquivo-compartilhado': 'Liberou um exame para você', 'busca-paciente': 'Localizou seu cadastro', 'paciente-cadastrado': 'Cadastrou o paciente', 'foto-vista': 'Viu a foto do paciente' };
 
 /* ------------------------------ Rotas ------------------------------ */
 type Handler = (req: Request, params: string[]) => Promise<Response>;
@@ -203,7 +205,7 @@ on('GET', 'auth/me', async (req) => {
   const base = { demo: DEMO, google: !!cfg.googleId };
   if (!a) return json({ ...base, user: null });
   if (!a.session.mfa_ok) return json({ ...base, user: null, pending: { email: maskEmail(a.email) } });
-  const out: Record<string, unknown> = { ...base, user: { role: a.user.role, email: a.email, lastLogin: a.user.last_login_at } };
+  const out: Record<string, unknown> = { ...base, user: { role: a.user.role, email: a.email, lastLogin: a.user.last_login_at, hasPhoto: !!a.user.avatar_path } };
   if (a.user.role === 'paciente') {
     const p = await db.one('patients', { user_id: a.user.id });
     if (p) out.patient = { number: p.number, nome: patientName(viewPatient(p)) };
@@ -378,7 +380,7 @@ on('GET', 'paciente/acessos', async (req) => {
   const p = await currentPatient(a);
   const rows = await db.select('audit_log', { patient_id: p.id }, { order: 'seq', desc: true, limit: 80 });
   const names = await doctorNames();
-  const labels: Record<string, string> = { 'prontuario-aberto': 'Abriu seu prontuário', 'anamnese-atualizada': 'Atualizou a anamnese', 'consulta-registrada': 'Registrou um atendimento', 'arquivo-anexado': 'Anexou um arquivo', 'arquivo-baixado': 'Abriu um arquivo', 'cadastro-atualizado': 'Atualizou o cadastro', 'permissao-solicitada': 'Pediu acesso aos seus documentos', 'permissao-concedido': 'Você autorizou acesso', 'permissao-negado': 'Você negou acesso', 'permissao-revogado': 'Você revogou acesso', 'paciente-criado': 'Cadastro criado', 'arquivo-compartilhado': 'Liberou um exame para você', 'busca-paciente': 'Localizou seu cadastro' };
+  const labels = ACCESS_LABELS;
   return json({ items: rows.map((r) => ({ em: r.at, quem: r.actor_role === 'paciente' ? 'Você' : names.get(r.actor_id || '') || 'Equipe', acao: labels[r.action] || r.action, detalhe: r.action === 'prontuario-aberto' ? r.detail : null })) });
 });
 
@@ -477,6 +479,8 @@ async function chartFor(p: PatientRow, d: DoctorRow) {
   const user = await db.one('users', { id: p.user_id });
   return {
     number: p.number,
+    hasPhoto: !!user?.avatar_path,
+    status: user?.status === 'convidado' ? 'convidado' : 'ativo',
     profile: { ...v.profile, contato: { ...((v.profile.contato as Record<string, unknown>) || {}), email: user ? decrypt(user.email_enc, 'email') : '' } },
     anamnesis: v.anamnesis,
     anamnesisVersion: v.anamnesisVersion,
@@ -566,6 +570,98 @@ on('POST', 'medico/prontuario/:n/permissao', async (req, [n]) => {
     mailLines: [`${doctorLabel(d)}, ${d.specialty}, pediu acesso aos documentos e exames que você anexou na sua área do paciente.`, 'Nada é liberado sem a sua decisão. Entre no ambiente seguro para autorizar por um período, negar ou revogar quando quiser.'],
   });
   return json({ ok: true, status: 'pendente' });
+});
+
+on('POST', 'medico/pacientes', async (req) => {
+  const { a, d } = await asDoctor(req);
+  const b = await body(req);
+  const nome = str(b.nome, 120);
+  const email = str(b.email, 200).toLowerCase();
+  const nascimento = str(b.nascimento, 10);
+  const celular = str(b.celular, 20);
+  const cpf = str(b.cpf, 14).replace(/\D/g, '');
+  const sexo = ['Feminino', 'Masculino', 'Intersexo', 'Prefiro não informar'].includes(str(b.sexo, 30)) ? str(b.sexo, 30) : '';
+  if (nome.split(/\s+/).length < 2) throw new UserError('Informe o nome completo do paciente.');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(nascimento) || new Date(nascimento).getTime() > Date.now()) throw new UserError('Informe a data de nascimento.');
+  if (!emailOk(email)) throw new UserError('Informe um e-mail válido: é por ele que o paciente recebe o acesso e os avisos.');
+  if (celular.replace(/\D/g, '').length < 10) throw new UserError('Informe o celular com DDD.');
+  if (cpf && !validCpf(cpf)) throw new UserError('CPF inválido.');
+  if (tooMany(`cadastro-paciente:${a.user.id}`, 30, 60 * 60_000)) {
+    await securityEvent('cadastro-em-massa', 'alta', { userId: a.user.id, ipHash: ipHash(req), detail: 'mais de 30 pacientes cadastrados em 1 hora' });
+    return fail(429, 'Limite de cadastros atingido. Fale com a administração.');
+  }
+  if (await findUserByEmail(email)) throw new UserError('Já existe um cadastro com este e-mail. Busque o paciente pelo e-mail.');
+  if (cpf && (await db.select('patients', { cpf_bidx: blindIndex('cpf', cpf) })).length) throw new UserError('Já existe um paciente com este CPF. Busque pelo CPF.');
+  const user = await createUser(email, 'paciente', { status: 'convidado' });
+  const p = await createPatient(user, email, { nome, nascimento, celular });
+  const v = viewPatient(p);
+  const id = { ...((v.profile.identificacao as Record<string, unknown>) || {}), ...(cpf ? { cpf: cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') } : {}), ...(sexo ? { sexo } : {}) };
+  await saveProfile(p, { ...v.profile, identificacao: id }, { id: a.user.id, role: 'medico' });
+  await audit({ actorId: a.user.id, actorRole: 'medico', action: 'paciente-cadastrado', patientId: p.id, detail: doctorLabel(d) });
+  const token = newToken();
+  await db.insert('otps', { user_id: user.id, purpose: 'ativacao', code_hash: tokenHash('ativacao:' + token), expires_at: minutesFromNow(7 * 24 * 60), attempts: 0, consumed_at: null, created_at: now() });
+  await sendMail({ to: email, subject: 'Sua área do paciente no Hospital São Paulo', title: `Olá, ${nome.split(' ')[0]}`, lines: [`${doctorLabel(d)} abriu o seu cadastro no ambiente seguro do Hospital São Paulo. Seu número de paciente é ${p.number}.`, 'Crie sua senha pelo botão abaixo para ver seus exames, orientações e documentos. O convite vale por 7 dias e, em todo acesso, você receberá um código de verificação por e-mail.'], button: { label: 'Criar minha senha', href: `${cfg.siteUrl}/acesso?etapa=ativar&area=paciente&token=${token}` }, kind: 'convite' });
+  return json({ ok: true, number: p.number, ...(DEMO ? { demoLink: `/acesso?etapa=ativar&area=paciente&token=${token}` } : {}) });
+});
+
+on('PUT', 'medico/prontuario/:n/cadastro', async (req, [n]) => {
+  const { a } = await asDoctor(req);
+  const p = await patientByNumber(n);
+  const b = await body<{ value: unknown }>(req);
+  const value = sanitizeForm(PROFILE, b.value, 'medico');
+  const id = (value.identificacao || {}) as Record<string, unknown>;
+  if (!id.nome || String(id.nome).length < 3) throw new UserError('Informe o nome completo.');
+  if (id.cpf && !validCpf(String(id.cpf))) throw new UserError('CPF inválido.');
+  value.contato = { ...((value.contato as Record<string, unknown>) || {}), email: (await userEmail(p.user_id)) || '' };
+  await saveProfile(p, value, { id: a.user.id, role: 'medico' });
+  return json({ ok: true });
+});
+
+on('GET', 'medico/prontuario/:n/acessos', async (req, [n]) => {
+  const { a } = await asDoctor(req);
+  const p = await patientByNumber(n);
+  if (!(await recentlyOpened(a.user.id, p.id))) return fail(403, 'Abra o prontuário informando o motivo.');
+  const rows = await db.select('audit_log', { patient_id: p.id }, { order: 'seq', desc: true, limit: 120 });
+  const names = await doctorNames();
+  return json({ items: rows.map((r) => ({ em: r.at, quem: r.action === 'paciente-criado' ? 'Sistema' : r.actor_role === 'paciente' ? 'Paciente' : names.get(r.actor_id || '') || (r.actor_role === 'admin' ? 'Administração' : 'Equipe'), acao: (ACCESS_LABELS[r.action] || r.action).replace('seu prontuário', 'o prontuário').replace('seus documentos', 'os documentos').replace('Você ', 'Paciente ').replace('para você', 'ao paciente').replace('Localizou seu cadastro', 'Localizou o cadastro'), detalhe: r.action === 'prontuario-aberto' ? r.detail : null })) });
+});
+
+async function recentlyOpened(userId: string, patientId: string) {
+  const rows = await db.select('audit_log', { actor_id: userId, patient_id: patientId, action: 'prontuario-aberto' }, { order: 'seq', desc: true, limit: 1 });
+  const created = await db.select('audit_log', { actor_id: userId, patient_id: patientId, action: 'paciente-cadastrado' }, { order: 'seq', desc: true, limit: 1 });
+  const last = [...rows, ...created].map((r) => new Date(r.at).getTime()).sort((x, y) => y - x)[0];
+  return !!last && Date.now() - last < 12 * 3600_000;
+}
+
+/* ===== Foto de perfil ===== */
+const photo = (img: { buf: Buffer; mime: string }) => new Response(new Uint8Array(img.buf), { headers: { ...BASE_HEADERS, 'Content-Type': img.mime, 'Cache-Control': 'private, no-store', 'Content-Security-Policy': "default-src 'none'; sandbox" } });
+
+on('POST', 'perfil/foto', async (req) => {
+  const a = await getAuth(req, { roles: ['paciente', 'medico', 'admin'] });
+  if (!a) throw new AuthError();
+  const form = await req.formData();
+  const file = form.get('foto');
+  if (!(file instanceof File)) throw new UserError('Selecione uma foto.');
+  await storeAvatar(a.user, file);
+  return json({ ok: true });
+});
+
+on('GET', 'perfil/foto', async (req) => {
+  const a = await getAuth(req, { roles: ['paciente', 'medico', 'admin'] });
+  if (!a) throw new AuthError();
+  const img = await readAvatar(await db.one('users', { id: a.user.id }));
+  return img ? photo(img) : fail(404, 'Sem foto.');
+});
+
+on('GET', 'medico/prontuario/:n/foto', async (req, [n]) => {
+  const { a } = await asDoctor(req);
+  const p = await patientByNumber(n);
+  if (!(await recentlyOpened(a.user.id, p.id))) {
+    await securityEvent('foto-sem-acesso', 'media', { userId: a.user.id, ipHash: ipHash(req), detail: `pediu foto de ${p.number} sem abrir o prontuário` });
+    return fail(403, 'Abra o prontuário informando o motivo.');
+  }
+  const img = await readAvatar(await db.one('users', { id: p.user_id }));
+  return img ? photo(img) : fail(404, 'Sem foto.');
 });
 
 /* ===== Administração ===== */

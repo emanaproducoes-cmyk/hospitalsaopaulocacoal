@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Icon } from '@/components/ui/Icon';
 import { asset } from '@/lib/asset';
 import { sx } from './client';
-import { SecureBadge } from './SecureUI';
+import { LegalNote } from './SecureUI';
 
 type Area = 'paciente' | 'medico';
 type Step = 'entrar' | 'criar' | 'verificar' | 'esqueci' | 'redefinir' | 'ativar';
@@ -139,7 +139,7 @@ export function AuthApp() {
     const q = new URLSearchParams(window.location.search);
     if (q.get('area') === 'medico') setArea('medico');
     if (q.get('erro')) setErr(ERR[q.get('erro')!] || 'Não foi possível concluir o acesso.');
-    if (q.get('etapa') === 'ativar' && q.get('token')) { setStep('ativar'); setToken(q.get('token')!); setArea('medico'); }
+    if (q.get('etapa') === 'ativar' && q.get('token')) { setStep('ativar'); setToken(q.get('token')!); setArea(q.get('area') === 'paciente' ? 'paciente' : 'medico'); }
     sx<{ demo: boolean; google: boolean; user: { role: string } | null; pending?: { email: string } }>('auth/me').then((r) => {
       setDemo(r.demo);
       setGoogle(r.google);
@@ -167,7 +167,7 @@ export function AuthApp() {
   const resend = () => run(async () => { await sx('auth/resend', { method: 'POST', json: {} }); setInfo('Enviamos um novo código.'); setCool(60); });
   const forgot = (e: React.FormEvent) => { e.preventDefault(); run(async () => { const r = await sx<{ email: string }>('auth/forgot', { json: { email } }); setMasked(r.email); setStep('redefinir'); setInfo('Se houver uma conta com este e-mail, enviamos um código.'); }); };
   const reset = (e: React.FormEvent) => { e.preventDefault(); if (pw !== pw2) return setErr('As senhas não conferem.'); run(async () => { await sx('auth/reset', { json: { email, code, password: pw } }); go('entrar'); setInfo('Senha alterada. Entre com a nova senha.'); }); };
-  const activate = (e: React.FormEvent) => { e.preventDefault(); if (pw !== pw2) return setErr('As senhas não conferem.'); run(async () => { await sx('auth/activate', { json: { token, password: pw } }); go('entrar'); setInfo('Conta ativada. Entre com seu e-mail e a nova senha.'); window.history.replaceState(null, '', '/acesso?area=medico'); }); };
+  const activate = (e: React.FormEvent) => { e.preventDefault(); if (pw !== pw2) return setErr('As senhas não conferem.'); run(async () => { await sx('auth/activate', { json: { token, password: pw } }); go('entrar'); setInfo('Conta ativada. Entre com seu e-mail e a nova senha.'); window.history.replaceState(null, '', `/acesso?area=${area}`); }); };
 
   const titles: Record<Step, [string, string]> = {
     entrar: [area === 'paciente' ? 'Área do paciente' : 'Área do médico', area === 'paciente' ? 'Seu prontuário, exames e documentos em um só lugar.' : 'Prontuário completo dos seus pacientes, com segurança.'],
@@ -175,12 +175,12 @@ export function AuthApp() {
     verificar: ['Verificação em duas etapas', `Digite o código de 6 dígitos que enviamos para ${masked || 'o seu e-mail'}.`],
     esqueci: ['Esqueci minha senha', 'Informe o e-mail da conta para receber um código.'],
     redefinir: ['Criar nova senha', `Digite o código enviado para ${masked || 'o seu e-mail'} e a nova senha.`],
-    ativar: ['Ativar acesso médico', 'Crie sua senha. Em todo acesso você também receberá um código por e-mail.'],
+    ativar: [area === 'paciente' ? 'Ative sua área do paciente' : 'Ativar acesso médico', 'Crie sua senha. Em todo acesso você também receberá um código por e-mail.'],
   };
 
   return (
     <div className="ax">
-      <div className="ax-visual" aria-hidden="true">
+      <div className="ax-visual">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={asset('/images/galeria/equipe.webp')} alt="" />
         <div className="ax-visual-shade" />
@@ -196,12 +196,7 @@ export function AuthApp() {
             <li><Icon name="baby" size={20} /> Maternidade, diagnóstico e exames</li>
           </ul>
         </div>
-        <div className="ax-visual-foot">
-          <span><Icon name="fingerprint" size={15} /> Verificação em duas etapas em todo acesso</span>
-          <span><Icon name="lock" size={15} /> Dados e arquivos criptografados (AES-256)</span>
-          <span><Icon name="key" size={15} /> Você decide quem vê seus documentos</span>
-          <span><Icon name="history" size={15} /> Registro de cada acesso ao prontuário</span>
-        </div>
+        <div className="ax-visual-foot"><LegalNote /></div>
       </div>
 
       <main className="ax-main" id="conteudo">
@@ -306,9 +301,9 @@ export function AuthApp() {
             </form>
           )}
 
-          <SecureBadge />
         </div>
         {demo && <DemoBox refreshKey={tick} onPick={(a, e) => { setArea(a); setEmail(e); setPw('Hbsp-Demo-2026'); setErr(''); setStep('entrar'); }} />}
+        <LegalNote className="ax-legal-mobile" />
       </main>
     </div>
   );

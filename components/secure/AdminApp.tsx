@@ -5,7 +5,7 @@ import { Icon } from '@/components/ui/Icon';
 import { asset } from '@/lib/asset';
 import { UF } from '@/lib/clinical/schema';
 import { fmtDateTime, SessionError, sx } from './client';
-import { Empty, IdleWatch, Panel, Pill, SecureBadge, Spinner, Toast, type ToastT } from './SecureUI';
+import { Empty, IdleWatch, LegalNote, Panel, Pill, Spinner, Toast, type ToastT } from './SecureUI';
 
 interface Admin {
   medicos: { nome: string; crm: string; rqe: string | null; especialidade: string; status: string; email: string }[];
@@ -50,7 +50,7 @@ export function AdminApp() {
         <button type="button" className="sx-logout" onClick={logout}><Icon name="logout" size={18} /> Sair com segurança</button>
       </aside>
       <main className="sx-main" id="conteudo">
-        <header className="sx-top"><div><p className="sx-kicker">Administração</p><h1>Painel de segurança</h1></div><SecureBadge compact /></header>
+        <header className="sx-top"><div><p className="sx-kicker">Administração</p><h1>Painel de segurança</h1></div></header>
         <div className="sx-cards">
           <Panel title="Pacientes" icon="users"><p className="sx-big">{d.totais.pacientes}</p></Panel>
           <Panel title="Médicos" icon="stethoscope"><p className="sx-big">{d.totais.medicos}</p></Panel>
@@ -87,6 +87,7 @@ export function AdminApp() {
             </table>
           ) : <Empty icon="shield">Nenhum evento registrado.</Empty>}
         </Panel>
+        <LegalNote />
         <Toast toast={toast} onDone={() => setToast(null)} />
       </main>
     </div>

@@ -122,7 +122,7 @@ export async function saveProfile(p: PatientRow, profile: FormValue, actor: { id
   await db.update('patients', { id: p.id }, {
     profile_enc: encryptJson(profile, aad(p, 'perfil')),
     name_bidx: blindIndex('nome', String(id.nome || '')),
-    cpf_bidx: id.cpf ? blindIndex('cpf', String(id.cpf)) : null,
+    cpf_bidx: id.cpf ? blindIndex('cpf', String(id.cpf).replace(/\D/g, '')) : null,
     updated_at: now(),
   });
   await audit({ actorId: actor.id, actorRole: actor.role, action: 'cadastro-atualizado', patientId: p.id });
@@ -229,3 +229,24 @@ async function pushCrm(p: PatientRow, profile: FormValue, event: string) {
 export const doctorLabel = (d: DoctorRow) => `${d.name} · CRM-${d.uf} ${d.crm}`;
 
 export class UserError extends Error {}
+
+/* ---------------- Foto de perfil (criptografada, como os arquivos) ---------------- */
+export const AVATAR_MAX = 600 * 1024;
+export async function storeAvatar(user: UserRow, file: File): Promise<void> {
+  if (file.size > AVATAR_MAX) throw new UserError('Foto grande demais. Use uma imagem menor.');
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) throw new UserError('Envie uma foto JPG, PNG ou WEBP.');
+  const buf = Buffer.from(await file.arrayBuffer());
+  if (!MAGIC[file.type]?.(buf)) {
+    await securityEvent('arquivo-disfarcado', 'alta', { userId: user.id, detail: `foto de perfil não confere com ${file.type}` });
+    throw new UserError('O conteúdo da foto não confere com o tipo informado.');
+  }
+  const path = `avatars/${user.id}/${randomUUID()}.bin`;
+  await storage.put(path, encryptFile(buf, `avatar:${user.id}`));
+  await db.update('users', { id: user.id }, { avatar_path: `${path}|${file.type}` });
+  await audit({ actorId: user.id, actorRole: user.role, action: 'foto-atualizada' });
+}
+export async function readAvatar(user: UserRow | null): Promise<{ buf: Buffer; mime: string } | null> {
+  if (!user?.avatar_path) return null;
+  const [path, mime] = user.avatar_path.split('|');
+  try { return { buf: decryptFile(await storage.get(path), `avatar:${user.id}`), mime: mime || 'image/jpeg' }; } catch { return null; }
+}

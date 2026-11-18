@@ -35,6 +35,7 @@ Este documento descreve como o ambiente protege os dados, o que já está pronto
   - São criptografados antes de chegar ao armazenamento, num bucket privado.
   - O servidor confere se o conteúdo real corresponde ao tipo declarado (PDF, JPG, PNG, WEBP), para barrar arquivo disfarçado, e guarda o SHA-256 de cada arquivo.
   - A integridade é verificada a cada abertura; o arquivo é entregue com cabeçalhos que impedem execução.
+- **Foto de perfil.** Reduzida no navegador, criptografada como os arquivos e servida só ao próprio usuário. O médico vê a foto do paciente apenas com o prontuário aberto (com motivo) nas últimas 12 horas.
 - **Banco.**
   - RLS ligado em todas as tabelas, sem nenhuma política: a chave pública do Supabase não lê nada.
   - Só o servidor, com a chave de serviço, acessa.
@@ -51,7 +52,7 @@ Este documento descreve como o ambiente protege os dados, o que já está pronto
 | Quem | Vê |
 |---|---|
 | Paciente | Os próprios dados, anamnese, atendimentos (sem as notas privadas da equipe), exames liberados, documentos que enviou, pedidos de permissão e **quem acessou o seu prontuário**. |
-| Médico | Busca por número (HB0001SP), CPF, e-mail ou nome completo. Não há lista aberta de pacientes. Para abrir um prontuário informa o **motivo**, e o acesso fica visível ao paciente. Edita a anamnese, registra atendimentos e anexa e libera exames. |
+| Médico | Cadastra pacientes novos: o paciente recebe número e convite por e-mail (7 dias) para criar a senha. Edita dados pessoais, anamnese, atendimentos, vê evolução (sinais vitais, prescrições, CID) e quem acessou o prontuário. Busca por número (HB0001SP), CPF, e-mail ou nome completo. Não há lista aberta de pacientes. Para abrir um prontuário informa o **motivo**, e o acesso fica visível ao paciente. Edita a anamnese, registra atendimentos e anexa e libera exames. |
 | Médico × documentos do paciente | Só com **autorização do paciente**. O médico pede, o paciente recebe e-mail, entra no ambiente seguro e autoriza por 30 dias ou 1 ano, nega ou revoga quando quiser. |
 | Administração | Cadastra médicos, vê eventos de segurança e o estado da trilha de auditoria. **Não** vê prontuários. |
 
@@ -96,3 +97,13 @@ Todos os eventos ficam no painel da administração.
 - A 2ª etapa é só por e-mail. O código por WhatsApp entra quando houver conta oficial do WhatsApp Business, e o app autenticador (TOTP) pode ser adicionado para médicos.
 - Os limites de tentativas ficam na memória de cada instância do servidor. Para tráfego alto, mover para um armazenamento compartilhado (Upstash/Redis).
 - No modo demonstração na Vercel, várias instâncias podem não compartilhar a memória. Para homologar com estabilidade, configure o Supabase **mesmo com dados fictícios**.
+
+## 7. Nota legal exibida no ambiente
+
+O rodapé das telas de acesso e das áreas do paciente, do médico e da administração informa:
+- a proteção dos dados pela LGPD (Lei 13.709/2018, arts. 11 e 46), pelo sigilo profissional e pelas normas do CFM;
+- o crime de invasão de dispositivo informático (art. 154-A do Código Penal, Lei 12.737/2012 com a redação da Lei 14.155/2021);
+- o crime de violação de segredo profissional (art. 154 do Código Penal);
+- o registro das tentativas de acesso indevido.
+
+O texto fica em `components/secure/SecureUI.tsx` (`LEGAL_TEXT`). Ele deve ser revisado pelo jurídico do hospital.

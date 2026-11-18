@@ -1190,7 +1190,7 @@
   .ax { display: grid; min-height: 100vh; }
   @media (min-width: 1000px) { .ax { grid-template-columns: 1.05fr 1fr; } }
   .ax-visual { position: relative; overflow: hidden; display: none; color: #fff; }
-  @media (min-width: 1000px) { .ax-visual { display: block; position: sticky; top: 0; height: 100vh; } }
+  @media (min-width: 1000px) { .ax-visual { display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; } }
   .ax-visual > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 60% 30%; transform: scale(1.04); }
   .ax-visual-shade { position: absolute; inset: 0; background: linear-gradient(160deg, rgba(11, 21, 56, 0.94) 0%, rgba(20, 33, 79, 0.86) 38%, rgba(41, 65, 151, 0.62) 70%, rgba(47, 164, 65, 0.45) 100%); }
   .ax-visual-copy { position: relative; height: 100%; display: flex; flex-direction: column; justify-content: center; padding: clamp(2.5rem, 5vw, 5rem); max-width: 620px; }
@@ -1201,10 +1201,11 @@
   .ax-visual ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.9rem; }
   .ax-visual li { display: flex; align-items: center; gap: 0.8rem; font-size: 1.02rem; color: #dfe6f7; padding: 0.75rem 1rem; border-radius: 14px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.14); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
   .ax-visual li .icon { color: var(--sx-mint); flex: none; }
-  .ax-visual-foot { position: absolute; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.55rem 1.4rem; padding: 1rem clamp(2.5rem, 5vw, 5rem); font-size: 0.78rem; color: #c9d3ee; border-top: 1px solid rgba(255, 255, 255, 0.14); background: rgba(11, 21, 56, 0.55); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
-  .ax-visual-foot span { display: inline-flex; align-items: center; gap: 0.4rem; }
-  .ax-visual-foot .icon { color: var(--sx-mint); flex: none; }
-  .ax-visual-copy { padding-bottom: 6.5rem; padding-top: 2rem; }
+  .ax-visual-foot { position: relative; flex: none; padding: 0.2rem clamp(2.5rem, 5vw, 5rem) 1.1rem; background: rgba(8, 16, 44, 0.9); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 -24px 40px rgba(8, 16, 44, 0.55); }
+  .ax-visual-foot .sx-legal { margin: 0; color: #d3dbef; border-top-color: #e2b23a; }
+  .ax-visual-copy { flex: 1 1 auto; min-height: 0; height: auto !important; justify-content: center; padding-top: clamp(1.5rem, 4vh, 3rem) !important; padding-bottom: clamp(1.5rem, 4vh, 3rem) !important; }
+  .ax-visual .ax-logo { margin-bottom: clamp(1rem, 3vh, 2.5rem); }
+  @media (max-height: 800px) { .ax-visual .ax-visual-copy h2 { font-size: 2.1rem; margin-bottom: 1rem; } .ax-visual .ax-visual-copy li { padding: 0.5rem 0.9rem; font-size: 0.92rem; } .ax-visual .ax-logo { width: 120px; } .ax-visual-foot .sx-legal { font-size: 0.66rem; line-height: 1.5; } }
   .ax-visual .ax-visual-copy h2 { font-size: clamp(2rem, 1.1rem + 1.9vw, 2.8rem); margin-bottom: 1.6rem; }
   .ax-visual .ax-visual-copy ul { gap: 0.7rem; }
   .ax-visual .ax-visual-copy li { padding: 0.65rem 1rem; font-size: 0.98rem; }
@@ -1505,4 +1506,28 @@
     .sx-savebar .sx-btn { height: 40px; padding: 0 0.9rem; font-size: 0.84rem; }
     .sx-chips { gap: 0.35rem; }
   }
+}
+
+@layer components {
+  /* ---------- Nota legal de rodapé ---------- */
+  .sx-legal { margin: 2.5rem 0 0; padding-top: 0.75rem; border-top: 1px solid #e2b23a; font-size: 0.72rem; line-height: 1.55; color: var(--sx-body, #42506b); text-align: left; text-wrap: pretty; }
+  .ax-legal-mobile { max-width: 460px; margin: 1.5rem auto 0; }
+  @media (min-width: 1000px) { .ax-legal-mobile { display: none; } }
+
+  /* ---------- Foto de perfil ao lado do logo ---------- */
+  .sx-brandrow { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+  .sx-me { position: relative; flex: none; width: 46px; height: 46px; padding: 0; border-radius: 50%; cursor: pointer; display: grid; place-items: center; color: #fff; font: 700 0.9rem/1 var(--font-display, inherit); background: linear-gradient(135deg, rgba(58, 91, 208, 0.85), rgba(47, 164, 65, 0.85)); border: 1.5px solid rgba(255, 255, 255, 0.55); box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25); transition: transform var(--t-fast), border-color var(--t-fast); }
+  .sx-me:hover, .sx-me:focus-visible { transform: scale(1.05); border-color: var(--sx-mint); outline: none; }
+  .sx-me img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+  .sx-me i { position: absolute; right: -3px; bottom: -3px; width: 19px; height: 19px; border-radius: 50%; display: grid; place-items: center; color: var(--sx-navy); background: #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25); }
+  .sx-me.is-busy { opacity: 0.6; pointer-events: none; }
+  .sx-avatar.has-photo { background: #dfe6f7; overflow: hidden; }
+  .sx-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  @media (max-width: 1023px) { .sx-brandrow { gap: 0.6rem; } .sx-me { width: 38px; height: 38px; font-size: 0.78rem; } }
+
+  /* ---------- Médico: novo paciente, tabelas ---------- */
+  .sx-form-actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.4rem; }
+  .sx-table-wrap { overflow-x: auto; max-width: 100%; }
+  .sx-ph-number { display: flex; align-items: center; flex-wrap: wrap; gap: 0.6rem; }
+  .sx-ph-number .sx-pill { font-family: var(--font-body, inherit); letter-spacing: 0; font-size: 0.75rem; }
 }
